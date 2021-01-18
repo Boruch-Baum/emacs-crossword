@@ -1,0 +1,6 @@
+2021-01-18  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.el (crossword--summary-colophon-list)
+	(crossword--summary-data-puz, crossword--summary-add-current):
+	Combine colophon regexes into single function. Adjust regex for
+	comma.

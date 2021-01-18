@@ -1445,6 +1445,14 @@ STRING])."
       (push (list (cl-incf id) (seq--into-vector elem)) result))))
 
 
+(defun crossword--summary-colophon-list (colophon)
+  "Format elements of raw COLOPHON list."
+  (list
+    (replace-regexp-in-string "^\\( +\\)?" "" (nth 0 colophon))
+    (replace-regexp-in-string "^\\( +\\)?\\([Bb]y +\\)?" "" (nth 1 colophon))
+    (replace-regexp-in-string
+      "^\\( +\\)?\xa9?©?\\( +\\)?\\([[:digit:]]+,? +\\)?" "" (nth 2 colophon))))
+
 (defun crossword--summary-data-puz (file)
   "Get summary data for .puz FILE.
 See function `crossword-summary-rebuild-data' for details."
@@ -1471,14 +1479,9 @@ See function `crossword-summary-rebuild-data' for details."
            (list (file-name-sans-extension (file-name-nondirectory file))
                  (file-name-extension file)
                  (crossword--get-date file))
-           (let ((colophon (butlast (split-string
-                                      (buffer-substring 1 (point))
-                                      "\n" nil "\n"))))
-             (list
-               (replace-regexp-in-string "^\\( +\\)?" "" (nth 0 colophon))
-               (replace-regexp-in-string "^\\( +\\)?\\([Bb]y +\\)?" "" (nth 1 colophon))
-               (replace-regexp-in-string
-                 "^\\( +\\)?\xa9?©?\\( +\\)?\\([[:digit:]]+ +\\)?" "" (nth 2 colophon))))
+           (crossword--summary-colophon-list
+             (butlast (split-string (buffer-substring 1 (point))
+                                    "\n" nil "\n")))
            (list "0" "0" "0" "0" "00:00")))))))
 
 
@@ -1491,17 +1494,10 @@ See function `crossword-summary-rebuild-data' for details."
     (nconc (list (file-name-sans-extension (file-name-nondirectory crossword--filename))
                  (file-name-extension crossword--filename)
                  crossword--date)
-           (let ((colophon
-                   (butlast
-                     (split-string
-                       (buffer-substring-no-properties
-                         1 (1+ (search-forward "\n" nil nil 3)))
-                       "\n"))))
-             (list
-               (replace-regexp-in-string "^\\( +\\)?" "" (nth 0 colophon))
-               (replace-regexp-in-string "^\\( +\\)?\\([Bb]y +\\)?" "" (nth 1 colophon))
-               (replace-regexp-in-string
-                 "^\\( +\\)?\xa9?©?\\( +\\)?\\([[:digit:]]+ +\\)?" "" (nth 2 colophon))))
+           (crossword--summary-colophon-list
+             (butlast (split-string (buffer-substring-no-properties
+                                      1 (1+ (search-forward "\n" nil nil 3)))
+                                    "\n")))
            (list
              (getval crossword--completion-percent-pos 3)
              (getval crossword--solved-percent-pos 3)
