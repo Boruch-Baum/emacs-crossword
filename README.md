@@ -1,4 +1,4 @@
-# crossword.el -  Download and play crossword puzzles in Emacs.
+# crossword.el
 
    * Download and play crossword puzzles in Emacs.
 
@@ -13,18 +13,18 @@
    * seq            - for `seq--into-vector`
    * tabulated-list - for `tabulated-list-mode`, etal.
    * hl-line        - for `hl-line-mode`
-   * calendar       - for `calendar-read' etal.
+   * calendar       - for `calendar-read` etal.
 
 ## Installation:
 
    1) Evaluate or load or install this file.
 
-   2) Optionally, define a global keybinding or defalias for functions
-      `crossword'
-
+   2) Optionally, define a global keybinding or defalias for function
+      `crossword`
+```
          (global-set-key (kbd "foo") 'crossword))
          (defalias 'crossword 'foo)
-
+```
    3) Depending on your temperament and style, you might also want to
       set direct keybindings and aliases for functions
       `crossword-download`, `crossword-display`, and `crossword-load`;
@@ -40,13 +40,13 @@
    `crossword-save-path`, but otherwise, try using the mode first
    without any customization.
 
-   There exist four customizations for how POINT advances after you
-   fill-in a square or navigate: `crossword-arrow-changes-direction'
-   `crossword-wrap-on-entry-or-nav', `crossword-tab-to-next-unfilled'
-   `crossword-auto-nav-only-within-clue'.
+   There exist four customizations for how `POINT` advances after you
+   fill-in a square or navigate: `crossword-arrow-changes-direction`,
+   `crossword-wrap-on-entry-or-nav`, `crossword-tab-to-next-unfilled`,
+   `crossword-auto-nav-only-within-clue`.
 
    If don't usually play more than one crossword in a sitting, you
-   may want to set `crossword-quit-to-browser' to NIL to save
+   may want to set `crossword-quit-to-browser` to `NIL` to save
    yourself a keystroke on exit.
 
    There are also several 'faces' defined to allow custom colorization
@@ -72,10 +72,10 @@
    handy-dandy nifty screenshot-suitable metadata browser of all your
    known puzzle files, courtesy of Emacs' built-in
    `tabulated-list-mode`. Entries can be sorted by any column by
-   navigating POINT there and pressing 'S' once or twice. Press <RET>
+   navigating `POINT` there and pressing 'S' once or twice. Press \<RET\>
    to play the puzzle at point. You can also delete files here ('d').
 
-   ! IMPORTANT: The mode supports a single save file for each puzzle.
+   * IMPORTANT: The mode supports a single save file for each puzzle.
      These save files do not over-write the original file, so the
      partially- or completely- played puzzles appear in the browser
      alongside the untouched original. Save files can be identified in
@@ -99,7 +99,7 @@
 
    General navigation within the grid buffer should be intuitive, using
    all the usual keys. Additionally, filling in a square will advance
-   POINT to the next sensible one. Grids begin with an 'across'
+   `POINT` to the next sensible one. Grids begin with an 'across'
    navigation for solving across clues, but that's easily changed:
 
                    M-a           crossword-nav-dir-across
@@ -196,11 +196,12 @@
    Several puzzle file formats exist. This software, as currently
    written, parses the `.puz` file format created sometime in the 1990's
    by Literate Software LLC[1] and used initially by them for their
-   `across' line of software for creating, solving and sharing crossword
+   'across' line of software for creating, solving and sharing crossword
    puzzles. This format has supposedly since become the de facto
    standard for the genre[2].
 
    [1] http://www.litsoft.com/
+   
    [2] http://fileformats.archiveteam.org/wiki/PUZ_%28crossword_puzzles%29
 
 
