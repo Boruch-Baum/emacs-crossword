@@ -314,14 +314,12 @@
 
 (defcustom crossword-save-path "~/Crosswords/"
   "Directory where crossword data is to be stored."
-  :type  'directory
-  :group 'crossword)
+  :type  'directory)
 
 (defcustom crossword-quit-to-browser t
   "Whether quitting a puzzle opens a puzzle browser.
 Set this NIL to totally exit 'crossword' immediately."
-  :type  'boolean
-  :group 'crossword)
+  :type  'boolean)
 
 (defcustom crossword-empty-position-char "▦"
   "Character denoting non-insertion squares.
@@ -338,8 +336,7 @@ that is what is used in the .puz standard format. Ideas tried:
      🗷 01F5F7 BALLOT BOX WITH BOLD SCRIPT X
      ╳ 002573 BOX DRAWINGS LIGHT DIAGONAL CROSS
      ▦ 0025A6 SQUARE WITH ORTHOGONAL CROSSHATCH FILL"
-  :type 'string
-  :group 'crossword)
+  :type 'string)
 
 (defcustom crossword-wrap-on-entry-or-nav t
   "How to advance at ends of puzzle.
@@ -349,8 +346,7 @@ lower-right position and either entering data or navigating
 forward. This value will also be used for navigating backward
 from the top-left position to wrap to lower-right. When NIL,
 POINT is not advanced in such circumstances."
-  :type 'boolean
-  :group 'crossword)
+  :type 'boolean)
 
 (defcustom crossword-auto-nav-only-within-clue t
   "Stay within a clue when entering or deleting data.
@@ -359,8 +355,7 @@ clue. If all squares of the current clue have alpha characters,
 then stay at the current square. Otherwise, auto advance to the
 next non-alpha character square of the current clue,
 wrapping-around if necessary."
-  :type 'boolean
-  :group 'crossword)
+  :type 'boolean)
 
 
 (defcustom crossword-arrow-changes-direction t
@@ -369,8 +364,7 @@ When nil, arrow keys always navigate to next square in their
 direction. When non-nil, arrow keys only navigate in the current
 clue direction, and if that doesn't match the arrow direction,
 the clue direction is changed."
-  :type 'boolean
-  :group 'crossword)
+  :type 'boolean)
 
 
 (defcustom crossword-tab-to-next-unfilled t
@@ -380,8 +374,7 @@ When NIL, functions `crossword-next-field' and
 the next/prior field. When non-NIL, they navigate to the first
 empty square in the next/prior that has an empty square, which
 could be several fields distant."
-  :type 'boolean
-  :group 'crossword)
+  :type 'boolean)
 
 
 (defcustom crossword-download-puz-alist '(
@@ -397,8 +390,7 @@ could be several fields distant."
      "http://herbach.dnsalias.com/Jonesin/jz<YY><MM><DD>.puz"))
   "Download resources for .puz files."
   :type '(repeat (list (string :tag "Resource description")
-                       (string :tag "URL")))
-  :group 'crossword)
+                       (string :tag "URL"))))
 
 
 (defcustom crossword-download-xml-alist '(
@@ -416,8 +408,7 @@ could be several fields distant."
 NOTE: Support for this file format has not yet been written!"
   :type '(repeat (cons (string :tag "Resource description")
                        (string :tag "URL")))
-  :type 'boolean
-  :group 'crossword)
+  :type 'boolean)
 
 
 
@@ -545,7 +536,7 @@ either 'across or 'down.")
 
 
 ;;
-;;; Keymap and Mode definition
+;;; Keymap and Mode definitions
 
 (defvar crossword-mode-map
   (let ((map (make-sparse-keymap)))
@@ -585,10 +576,22 @@ either 'across or 'down.")
     map))
 
 
+(defvar crossword-summary-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "q")      'crossword-quit)
+    (define-key map (kbd "M-q")    'crossword-quit)
+    (define-key map (kbd "<RET>")  'crossword-summary-select)
+    (define-key map (kbd "d")      'crossword-summary-delete)
+    (define-key map "\t"              'crossword-summary-tab-forward)
+    (define-key map (kbd "<backtab>") 'crossword-summary-tab-backward)
+    (define-key map (kbd "g")      'crossword-summary-revert-buffer)
+    (define-key map (kbd "S")      'crossword-summary-sort)
+    map))
+
 (define-derived-mode crossword-mode fundamental-mode "Crossword"
   "Operate on puz file format crossword puzzles.
 \\{crossword-mode-map}"
-  (add-hook 'post-command-hook 'crossword--update-faces t t)
+  (add-hook 'post-command-hook #'crossword--update-faces t t)
   (overwrite-mode)
   (face-remap-add-relative 'default :family "Monospace")
   (advice-add #'self-insert-command :before
@@ -600,15 +603,6 @@ either 'across or 'down.")
 (define-derived-mode crossword-summary-mode tabulated-list-mode
   "Known crossword puzzles"
   "Mode for displayed crossword summary lists."
-  :group 'crossword
-  (define-key crossword-summary-mode-map (kbd "q")      'crossword-quit)
-  (define-key crossword-summary-mode-map (kbd "M-q")    'crossword-quit)
-  (define-key crossword-summary-mode-map (kbd "<RET>")  'crossword-summary-select)
-  (define-key crossword-summary-mode-map (kbd "d")      'crossword-summary-delete)
-  (define-key crossword-summary-mode-map "\t"              'crossword-summary-tab-forward)
-  (define-key crossword-summary-mode-map (kbd "<backtab>") 'crossword-summary-tab-backward)
-  (define-key crossword-summary-mode-map (kbd "g")      'crossword-summary-revert-buffer)
-  (define-key crossword-summary-mode-map (kbd "S")      'crossword-summary-sort)
   (setq tabulated-list-format
        `[("filename" 10 t)
          ("extension" 9 t)

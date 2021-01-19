@@ -1,3 +1,9 @@
+2021-01-19  Stefan Monnier <monnier@iro.umontreal.ca>
+
+	(crossword): Lint removal. Remove unnecessary 'group' from
+	defcustoms, define mode-map bindings separately from derived mode
+	function.
+
 2021-01-19  Case Duckworth  <acdw@acdw.net>
 	(crossword--download): Correct the curl command list. Github PR#5,
 	related to issue #3
