@@ -903,33 +903,34 @@ FRAME is expected to be the `selected-frame'. This function is
 meant for variable `window-size-change-functions'. It rebalances
 the frame's three windows, auto-fills the contents of the two
 clue listing buffers, and updates the clue data-structures."
-(when (equal "Crossword"
-             (cdr (assq 'name (frame-parameters frame))))
-;; (if window buffer is "Crossword list" then maybe print tabulated list ?
-  (balance-windows)
-  ;; snippet based upon part of function `crossword--start-game-puz'
-  (let ((grid-buffer      (set-buffer "Crossword grid"))
-        (across-buffer    crossword--across-buffer)
-        (down-buffer      crossword--down-buffer)
-        (across-clue-list crossword--across-clue-list)
-        (down-clue-list   crossword--down-clue-list)
-        (inhibit-read-only t))
-    (cl-flet ((strip2 (x) (mapcar (lambda (elem) (butlast elem 2)) x)))
-      (setq across-clue-list
-        (crossword--insert-clues across-buffer
-                                 'clue-across
-                                 (strip2 across-clue-list)
-                                 "--- Across clues for crossword"))
-      (setq down-clue-list
-        (crossword--insert-clues down-buffer
-                                 'clue-down
-                                 (strip2 down-clue-list)
-                                 "--- Down clues for crossword")))
-    ;; ** Finish in grid buffer
-    (set-buffer "Crossword grid")
-    (setq crossword--across-clue-list across-clue-list
-          crossword--down-clue-list   down-clue-list)
-    (crossword--update-faces 'force))))
+)
+;;(when (equal "Crossword"
+;;             (cdr (assq 'name (frame-parameters frame))))
+;;;; (if window buffer is "Crossword list" then maybe print tabulated list ?
+;;  (balance-windows)
+;;  ;; snippet based upon part of function `crossword--start-game-puz'
+;;  (let ((grid-buffer      (set-buffer "Crossword grid"))
+;;        (across-buffer    crossword--across-buffer)
+;;        (down-buffer      crossword--down-buffer)
+;;        (across-clue-list crossword--across-clue-list)
+;;        (down-clue-list   crossword--down-clue-list)
+;;        (inhibit-read-only t))
+;;    (cl-flet ((strip2 (x) (mapcar (lambda (elem) (butlast elem 2)) x)))
+;;      (setq across-clue-list
+;;        (crossword--insert-clues across-buffer
+;;                                 'clue-across
+;;                                 (strip2 across-clue-list)
+;;                                 "--- Across clues for crossword"))
+;;      (setq down-clue-list
+;;        (crossword--insert-clues down-buffer
+;;                                 'clue-down
+;;                                 (strip2 down-clue-list)
+;;                                 "--- Down clues for crossword")))
+;;    ;; ** Finish in grid buffer
+;;    (set-buffer "Crossword grid")
+;;    (setq crossword--across-clue-list across-clue-list
+;;          crossword--down-clue-list   down-clue-list)
+;;    (crossword--update-faces 'force))))
 
 
 (defun crossword--pre-insert ()
