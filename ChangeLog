@@ -1,3 +1,7 @@
+2021-01-19  Case Duckworth  <acdw@acdw.net>
+	(crossword--download): Correct the curl command list. Github PR#5,
+	related to issue #3
+
 2021-01-19  Boruch Baum  <boruch_baum@gmx.com>
 
 	* crossword.el (crossword--window-resize-function): Handle resize events.
