@@ -1,5 +1,10 @@
 2021-01-19  Boruch Baum  <boruch_baum@gmx.com>
 
+	(crossword--summary-data-puz): Remove trim from split-string to
+	solve github issue #6.
+
+2021-01-19  Boruch Baum  <boruch_baum@gmx.com>
+
 	* crossword.el (crossword--window-resize-function): Revert this to
 	a nil function to solve a bug in emacs28 for the quit function.
 

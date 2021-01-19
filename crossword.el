@@ -1552,7 +1552,7 @@ See function `crossword-summary-rebuild-data' for details."
                  (crossword--get-date file))
            (crossword--summary-colophon-list
              (butlast (split-string (buffer-substring 1 (point))
-                                    "\n" nil "\n")))
+                                    "\n" nil)))
            (list "0" "0" "0" "0" "00:00")))))))
 
 
