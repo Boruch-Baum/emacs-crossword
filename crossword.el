@@ -27,22 +27,29 @@
 
 ;;; Commentary:
 
-;; Download and play crossword puzzles in Emacs.
+;; * Download and play crossword puzzles in Emacs.
+;;
+;; * Includes a browser to view puzzles' detailed metadata, including
+;;   progress of partially played puzzles.
 
-;; Includes a browser to view puzzles' detailed metadata, including
-;; progress of partially played puzzles.
-
-;; Optionally, play against the clock, with the built-in timer.
+;; * Optionally, play against the clock, with the built-in timer.
 
 
 
 ;;
 ;;; Dependencies: (all already part of core Emacs)
-
+;;
 ;; seq            - for `seq--into-vector'
 ;; tabulated-list - for `tabulated-list-mode', etal.
 ;; hl-line        - for `hl-line-mode'
 ;; calendar       - for `calendar-read' etal.
+
+;;
+;;; Dependencies: (external to Emacs)
+;;
+;; The package uses either `wget' or `curl' to download packages from
+;; the network. These are both long-established standard programs and
+;; at least one is probably already installed on your computer.
 
 
 
@@ -62,6 +69,7 @@
 ;;     `crossword-download', `crossword-display', and `crossword-load';
 ;;     however, they're just one menu-selection away from function
 ;;     `crossword'.
+
 
 
 ;;
@@ -87,6 +95,7 @@
 ;;
 ;;  There are also several 'faces' defined to allow custom colorization
 ;;  and fontification. Knock yourself out.
+
 
 
 ;;
@@ -1550,12 +1559,22 @@ See function `crossword-summary-rebuild-data' for details."
   "Download a crossword puzzle file from URL.
 TITLE is a string. PATH is the destination."
   (let* (proc
-        (buf (generate-new-buffer "*crossword-download*")))
+        (buf (generate-new-buffer "*crossword-download*"))
+        (msg-fmt "%s\n\n  %s \n\n  %s\n\n")
+        cmd-str cmd)
+    (cond
+     ((executable-find "wget")
+       (setq cmd-str (format "wget -P %s %s" path url)
+             cmd     (list "wget" "-P" path url)))
+     ((executable-find "curl")
+       (setq cmd-str (format "curl -o %s%s %s" path (file-name-nondirectory url) url)
+             cmd     (list "wget" "-P" path url)))
+     (t (error "Missing executable 'wget' or 'curl'")))
     (with-current-buffer buf
-      (insert (current-time-string) "\n\n  " (or title " ")
-        "\n\n  wget -P" path " " url "\n\n")
+      (insert (format msg-fmt
+                (current-time-string) (or title " ") cmd-str))
       (setq crossword--local-proc (setq proc
-        (apply #'start-process "crossword-download" buf (list "wget" "-P" path url))))
+        (apply #'start-process "crossword-download" buf cmd)))
       (push (cons proc buf) crossword--download-processes-list)
       (add-hook 'kill-buffer-hook #'crossword--kill-associated-process nil t)
       (message "Requesting download.")
@@ -1567,7 +1586,7 @@ TITLE is a string. PATH is the destination."
             ((string-match "^finished" event)
               (message "Download complete")
               (assq-delete-all proc crossword--download-processes-list)
-              ; Is the assq-delete-all safe for race conditions?
+              ;; Is the assq-delete-all safe for race conditions?
               (kill-buffer buf))
             ((string-match "^open" event) t)
             ((string-match "^deleted" event) t)

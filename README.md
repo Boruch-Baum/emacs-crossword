@@ -16,6 +16,13 @@
    * calendar       - for `calendar-read` etal.
 
 
+## Dependencies: (external to Emacs)
+
+   The package uses either `wget` or `curl` to download packages from
+   the network. These are both long-established standard programs and
+   at least one is probably already installed on your computer.
+
+
 ## Installation:
 
    1) Evaluate or load or install this file.
@@ -207,7 +214,7 @@
 ## Download resources:
 
    This project wouldn't be useful without people sharing puzzles for
-   free network download. A big thanks are due to `Martin_Herbach' for
+   free network download. A big thanks are due to **Martin_Herbach** for
    being the provider of all the default download resources
    pre-configured in this sotware.
 
