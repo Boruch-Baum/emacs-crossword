@@ -289,7 +289,7 @@
 
 (defgroup crossword nil
   "Settings for the Emacs crossword puzzle game/downloader."
-  :group 'crossword
+  :group 'games
   :prefix "crossword-")
 
 (defcustom crossword-save-path "~/Crosswords/"
