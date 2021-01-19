@@ -15,6 +15,7 @@
    * hl-line        - for `hl-line-mode`
    * calendar       - for `calendar-read` etal.
 
+
 ## Installation:
 
    1) Evaluate or load or install this file.
@@ -174,7 +175,6 @@
                   <backtab>      crossword-prior-field
 
 
-
 ## Feedback:
 
   * It's best to contact me by opening an 'issue' on the program's
@@ -185,7 +185,6 @@
 
   * Please share your knowledge of other download resources, free
     software resources, and puzzle formats.
-
 
 
 ## Compatibility:
@@ -201,9 +200,29 @@
    standard for the genre[2].
 
    [1] http://www.litsoft.com/
-   
+
    [2] http://fileformats.archiveteam.org/wiki/PUZ_%28crossword_puzzles%29
 
+
+## Download resources:
+
+   This project wouldn't be useful without people sharing puzzles for
+   free network download. A big thanks are due to `Martin_Herbach' for
+   being the provider of all the default download resources
+   pre-configured in this sotware.
+
+   Please let me know of other resources that can be added.
+
+   Check these URLs for links to other puzzles. In many cases, you
+   need to look for a link labeled something like 'across-lite format'
+   or 'puz format':
+
+   * https://crosswordlinks.substack.com/?no_cover=true
+     * An aggregator, pointing to pages which have download links
+     * RSS: https://crosswordlinks.substack.com/feed
+
+   * https://crosswordfiend.com/download/
+     * The download links appear only with javascript enabled
 
 
 ## Comparable software:
@@ -217,18 +236,6 @@
 
    * shortyz - Android GUI package
      * https://f-droid.org/en/packages/com.totsp.crossword.shortyz/
-
-
-
-
-## Thank you:
-
-   This project wouldn't be useful without people sharing puzzles for
-   free network download. A big thanks are due to *Martin Herbach* for
-   being the provider of all the default download resources
-   pre-configured in this sotware.
-
-   Please let me know of other resources that can be added.
 
 
 ## Colophon

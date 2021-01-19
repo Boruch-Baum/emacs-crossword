@@ -244,6 +244,29 @@
 
 
 ;;
+;;; Download resources:
+
+;; This project wouldn't be useful without people sharing puzzles for
+;; free network download. A big thanks are due to `Martin_Herbach' for
+;; being the provider of all the default download resources
+;; pre-configured in this sotware.
+;;
+;; Please let me know of other resources that can be added.
+;;
+;; Check these URLs for links to other puzzles. In many cases, you
+;; need to look for a link labeled something like 'across-lite format'
+;; or 'puz format':
+;;
+;; * https://crosswordlinks.substack.com/?no_cover=true
+;;   * aggregator, pointing to pages which have download links
+;;   * RSS: https://crosswordlinks.substack.com/feed
+;;
+;; * https://crosswordfiend.com/download/
+;;   * The download links appear only with javascript enabled
+
+
+
+;;
 ;;; Comparable software:
 
 ;; I'm not aware of any other similar software for the linux terminal.
@@ -255,18 +278,6 @@
 ;;
 ;; * shortyz - Android GUI package
 ;;     https://f-droid.org/en/packages/com.totsp.crossword.shortyz/
-
-
-
-;;
-;;; Thank you:
-
-;; This project wouldn't be useful without people sharing puzzles for
-;; free network download. A big thanks are due to `Martin_Herbach' for
-;; being the provider of all the default download resources
-;; pre-configured in this sotware.
-;;
-;; Please let me know of other resources that can be added.
 
 
 
