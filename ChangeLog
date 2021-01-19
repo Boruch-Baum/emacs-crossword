@@ -5,6 +5,7 @@
 	(crossword-summary-rebuild-data): Check buffer exists before
 	killing it. [These solve github issue #1]
 	(crossword-summary-delete): Use new file name format.
+	(crossword): Define parent customization group as 'games'
 
 2021-01-18  Boruch Baum  <boruch_baum@gmx.com>
 
