@@ -23,7 +23,7 @@
 ;; General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this software. If not, see <http://www.gnu.org/licenses/>.
+;; along with this software. If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -570,7 +570,7 @@ either 'across or 'down.")
 \\{crossword-mode-map}"
   (add-hook 'post-command-hook 'crossword--update-faces t t)
   (overwrite-mode)
-  (advice-add 'self-insert-command :before
+  (advice-add #'self-insert-command :before
               (if (< emacs-major-version 27)
                 #'crossword--advice-before-self-insert-command_1
                #'crossword--advice-before-self-insert-command_2)))
@@ -602,8 +602,8 @@ either 'across or 'down.")
          ("time" 5 t)])
   (setq tabulated-list-sort-key (cons "date" 'flip))
   (setq tabulated-list-padding 2)
-  (setq tabulated-list-entries 'crossword--summary-list-entries)
-  (add-hook 'tabulated-list-revert-hook 'crossword--summary-revert-hook-function nil t)
+  (setq tabulated-list-entries #'crossword--summary-list-entries)
+  (add-hook 'tabulated-list-revert-hook #'crossword--summary-revert-hook-function nil t)
   (hl-line-mode)
   (tabulated-list-init-header))
 
@@ -721,7 +721,7 @@ expects the current buffer to be the crossword grid-buffer."
             (crossword--face-current-add (nth 2 clue) (nth 3 clue)))))
       ;; Grid buffer: down calculations
       (setq prior-clue-num (get-text-property crossword--prior-point 'clue-down))
-      (when (not (eq prior-clue-num this-clue-down))
+      (unless (eq prior-clue-num this-clue-down)
         (when prior-clue-num
           (setq clue (assq prior-clue-num crossword--down-clue-list))
           (setq pos-list (nth 2 clue))
@@ -866,7 +866,7 @@ submission."
          (month (cdr (assoc-string
                        (completing-read
                         "Month name: "
-                        (mapcar 'list (append month-array nil))
+                        (mapcar #'list (append month-array nil))
                         nil t nil nil
                         (aref month-array (1- (calendar-extract-month today))))
                       (calendar-make-alist month-array 1) t)))
@@ -921,7 +921,7 @@ messages to the echo are and to the messages buffer."
       ;; ** Update puzzle completion sattistics
       (cond
        ((string-match "[[:upper:]]" char-to-insert)
-        (when (not (string-match "[[:upper:]]" char-current))
+        (unless (string-match "[[:upper:]]" char-current)
           (cl-incf crossword--completed-count)))
        (t ; ie. (not (string-match "[[:upper:]]" char-to-insert))
         (when (string-match "[[:upper:]]" char-current)
@@ -1055,7 +1055,7 @@ square of the current clue."
        (when (and (not (crossword--fwd-avail end-pos))
                   wrap)
          (goto-char begin-pos)
-         (when (not (crossword--fwd-avail (1+ this-pos)))
+         (unless (crossword--fwd-avail (1+ this-pos))
            (goto-char this-pos)))
        (when (= (point) end-pos)
          (backward-char))))
@@ -1432,7 +1432,7 @@ puzzle's clues."
    (select-window grid-window 'norecord)
    (setq crossword--across-buffer    across-buffer
          crossword--down-buffer      down-buffer)
-   (add-hook 'kill-buffer-hook 'crossword--kill-grid-buffer-hook-function nil t)
+   (add-hook 'kill-buffer-hook #'crossword--kill-grid-buffer-hook-function nil t)
 ;  (when crossword--downloading-available
 ;    (add-hook 'kill-buffer-hook 'crossword--kill-all-asociated-processes  nil t))
 ;  (crossword--update-faces)
@@ -1544,9 +1544,9 @@ TITLE is a string. PATH is the destination."
       (insert (current-time-string) "\n\n  " (or title " ")
         "\n\n  wget -P" path " " url "\n\n")
       (setq crossword--local-proc (setq proc
-        (apply 'start-process "crossword-download" buf (list "wget" "-P" path url))))
+        (apply #'start-process "crossword-download" buf (list "wget" "-P" path url))))
       (push (cons proc buf) crossword--download-processes-list)
-      (add-hook 'kill-buffer-hook 'crossword--kill-associated-process nil t)
+      (add-hook 'kill-buffer-hook #'crossword--kill-associated-process nil t)
       (message "Requesting download.")
       (set-process-sentinel proc
         (lambda (proc event)
@@ -1586,7 +1586,7 @@ TITLE is a string. PATH is the destination."
      (re-search-forward "..." nil t)
      (replace-match (propertize " on" 'face 'crossword-solved-face))
      (setq crossword--timer-object
-       (run-at-time "1 sec" 1 'crossword--timer-update))))
+       (run-at-time "1 sec" 1 #'crossword--timer-update))))
    (goto-char pos)))
 
 
@@ -1599,7 +1599,7 @@ buffer, the current clue is highlighted as current, and in the
 down-clue buffer, the current clue is highlighted as
 other-direction."
   (interactive)
-  (when (not (eq crossword--nav-dir 'across))
+  (unless (eq crossword--nav-dir 'across)
     (setq crossword--nav-dir 'across)
     (let ((inhibit-read-only t)
           (this-clue-across (get-text-property (point) 'clue-across))
@@ -1629,7 +1629,7 @@ buffer, the current clue is highlighted as current, and in the
 across-clue buffer, the current clue is highlighted as
 other-direction."
   (interactive)
-  (when (not (eq crossword--nav-dir 'down))
+  (unless (eq crossword--nav-dir 'down)
     (setq crossword--nav-dir 'down)
     (let ((inhibit-read-only t)
           (this-clue-across (get-text-property (point) 'clue-across))
@@ -2123,7 +2123,7 @@ basename, and with an extension `.puz-emacs'."
 Prompts for FILE if not provided. This function expects that the
 crossword frame/windows/buffers environment exists."
   (interactive)
-  (when (not file)
+  (unless file
     (setq file (read-file-name "Puzzle file to restore: "
                                crossword-save-path nil t nil
                                (lambda (x) (string-match "\\.puz-emacs$" x)))))
@@ -2506,17 +2506,17 @@ arg DATE is expected to be a list of integers '(mm dd yyy)."
   (let (entry url
         (save-dir (expand-file-name crossword-save-path)))
    (if from
-     (when (not (setq entry (assoc from crossword-download-puz-alist)))
+     (unless (setq entry (assoc from crossword-download-puz-alist))
        (error "Unrecognized download resource: %s" from))
     (setq from (completing-read "Download from: "
       (mapcar (lambda (x) (car x)) crossword-download-puz-alist) nil t))
     (setq entry (assoc from crossword-download-puz-alist)))
-   ; NOTE: Earlier commits included here logic to check the day of the
-   ; week against a sub-list in the relevant entry of
-   ; `crossword-download-puz-alist' and reject mis-matches. The code
-   ; and the data structure element were removed because the
-   ; information was shown to be inaccurate and ever-changing. Now,
-   ; include a short note in an entry's description.
+   ;; NOTE: Earlier commits included here logic to check the day of the
+   ;; week against a sub-list in the relevant entry of
+   ;; `crossword-download-puz-alist' and reject mis-matches. The code
+   ;; and the data structure element were removed because the
+   ;; information was shown to be inaccurate and ever-changing. Now,
+   ;; include a short note in an entry's description.
    (while (not date)
      (condition-case nil
        (setq date (crossword--calendar-read-date))
@@ -2561,9 +2561,9 @@ completion details of played puzzles."
     (user-error "No existing download path configured"))
   (let ((choices
           (list (when (crossword--puzzle-file-list)
-                  (cons "Use the local crossword browser" 'crossword-summary))
-                (cons "Download a crossword puzzle" 'crossword-download)
-                (cons "Directly load a crossword from a local file" 'crossword-load))))
+                  (cons "Use the local crossword browser" #'crossword-summary))
+                (cons "Download a crossword puzzle" #'crossword-download)
+                (cons "Directly load a crossword from a local file" #'crossword-load))))
     (funcall (cdr (assoc-string
                     (completing-read     "Welcome to Emacs crossword! "
                       (mapcar (lambda (x) (car x)) choices) nil t (caar choices))

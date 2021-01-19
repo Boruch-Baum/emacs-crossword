@@ -1,3 +1,8 @@
+2021-01-19  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.el Changes throughout, for package linting, use #'
+	notation for functions, and prefer 'unless' to 'when not'
+
 2021-01-19  Paul W. Rankin  <pwr@bydasein.com>
 
 	(crossword): Define parent customization group as 'games' (github
