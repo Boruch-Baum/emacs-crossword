@@ -1568,7 +1568,9 @@ TITLE is a string. PATH is the destination."
              cmd     (list "wget" "-P" path url)))
      ((executable-find "curl")
        (setq cmd-str (format "curl -o %s%s %s" path (file-name-nondirectory url) url)
-             cmd     (list "wget" "-P" path url)))
+             cmd     (list "curl" "-o" (concat path
+                                               (file-as-nondirectory url))
+                           url))
      (t (error "Missing executable 'wget' or 'curl'")))
     (with-current-buffer buf
       (insert (format msg-fmt
