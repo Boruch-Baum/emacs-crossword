@@ -590,6 +590,7 @@ either 'across or 'down.")
 \\{crossword-mode-map}"
   (add-hook 'post-command-hook 'crossword--update-faces t t)
   (overwrite-mode)
+  (face-remap-add-relative 'default :family "Monospace")
   (advice-add #'self-insert-command :before
               (if (< emacs-major-version 27)
                 #'crossword--advice-before-self-insert-command_1
@@ -900,6 +901,40 @@ submission."
                            (lambda (x) (and (< 0 x) (<= x last)))
                            (number-to-string (calendar-extract-day today)))
             year))))
+
+
+(defun crossword--window-resize-function (frame)
+  "How to respond to window/frame resize events.
+FRAME is expected to be the `selected-frame'. This function is
+meant for variable `window-size-change-functions'. It rebalances
+the frame's three windows, auto-fills the contents of the two
+clue listing buffers, and updates the clue data-structures."
+(when (equal "Crossword"
+             (cdr (assq 'name (frame-parameters frame))))
+;; (if window buffer is "Crossword list" then maybe print tabulated list ?
+  (balance-windows)
+  ;; snippet based upon part of function `crossword--start-game-puz'
+  (let ((grid-buffer      (set-buffer "Crossword grid"))
+        (across-buffer    crossword--across-buffer)
+        (down-buffer      crossword--down-buffer)
+        (across-clue-list crossword--across-clue-list)
+        (down-clue-list   crossword--down-clue-list)
+        (inhibit-read-only t))
+    (setq across-clue-list
+      (crossword--insert-clues across-buffer
+                               'clue-across
+                               across-clue-list
+                               "--- Across clues for crossword"))
+    (setq down-clue-list
+      (crossword--insert-clues down-buffer
+                               'clue-down
+                               down-clue-list
+                               "--- Down clues for crossword"))
+    ;; ** Finish in grid buffer
+    (set-buffer "Crossword grid")
+    (setq crossword--across-clue-list across-clue-list
+          crossword--down-clue-list   down-clue-list)
+    (crossword--update-faces))))
 
 
 (defun crossword--pre-insert ()
@@ -1416,6 +1451,9 @@ puzzle's clues."
                    (setq puz-file
                      (read-file-name "Puzzle file: " nil nil t nil))))))
    (select-frame (make-frame (list '(name . "Crossword"))))
+   (setq window-size-change-functions
+     ;; FIXME: Maybe 'add-to-list' instead?
+     (list #'crossword--window-resize-function))
    ;; Create window and buffer for grid
    (setq grid-window (selected-window))
    (buffer-disable-undo
@@ -1436,6 +1474,7 @@ puzzle's clues."
        'norecord 'force))
    (set-window-dedicated-p across-window t)
    (erase-buffer) ; Unnecessary, but satisfies neuroses.
+   (face-remap-add-relative 'default :family "Monospace")
    ;; ** Create window and buffer for DOWN clues
    (select-window
      (setq down-window (split-window-right))
@@ -2514,6 +2553,9 @@ on their entry."
     (set-window-dedicated-p nil nil)
     (pop-to-buffer (set-buffer (get-buffer-create "Crossword list")))
     (set-window-dedicated-p nil t)
+    (setq window-size-change-functions
+      ;; FIXME: Maybe 'add-to-list' instead?
+      (list #'crossword--window-resize-function))
     (setq buffer-read-only nil)
     (setq crossword--filename nil)
     (delete-other-windows)
