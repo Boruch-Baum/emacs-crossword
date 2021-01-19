@@ -832,6 +832,20 @@ See mode `crossword-summary-mode'."
 ;;; Internal functions
 
 
+(defun crossword--check-and-create-save-path ()
+  "Check that a crossword save directory exists.
+If not, prompts the user to create one. Return non-nil on
+sucess."
+  (let ((save-dir crossword-save-path))
+   (cond
+    ((file-directory-p save-dir) t)
+    ((yes-or-no-p (format "Save directory '%s' does not exist.\nWe can create it now, or you can choose another save-path.\nDo so now? " save-dir))
+      (while (not (setq save-dir (read-file-name "? " nil "Crosswords"))))
+      (make-directory  save-dir t)
+      (setq crossword-save-path (file-name-as-directory save-dir)))
+    (t nil))))
+
+
 (defun crossword--calendar-read-date (&optional noday)
   "Prompt for Gregorian date.  Return a list (month day year).
 If optional NODAY is t, does not ask for day, but just returns
@@ -2336,6 +2350,7 @@ state. Internally, each entry is a list of ten strings:
    9: num errors
   10: timer elapsed time."
   (let ((orig-buf (current-buffer))
+        tmp-buf ; necessary?
         result)
     (dolist (file (crossword--puzzle-file-list) result)
       (push (if (string-match "\\.puz$" file)
@@ -2344,7 +2359,8 @@ state. Internally, each entry is a list of ten strings:
             result))
     (with-temp-file (crossword--summary-file)
       (prin1 result (current-buffer)))
-    (kill-buffer "Crossword temporary")
+    (when (setq tmp-buf (get-buffer "Crossword temporary"))
+      (kill-buffer tmp-buf)) ; necessary?
     (set-buffer orig-buf)))
 
 
@@ -2384,7 +2400,8 @@ Default is to advance one column."
   (let* ((puz-file (aref (tabulated-list-get-entry) 0))
          (msg (format "Do you really want to delete file %s? " puz-file)))
     (when (yes-or-no-p msg)
-      (delete-file (concat crossword-save-path puz-file))
+      (delete-file (concat crossword-save-path puz-file "."
+                           (aref (tabulated-list-get-entry) 1)))
       (crossword--summary-revert-hook-function))))
 
 
@@ -2455,6 +2472,8 @@ This includes progress for partially played puzzles. Data can be
 sorted by any column, and puzzles can be played by pressing <RET>
 on their entry."
   (interactive)
+  (unless (crossword--check-and-create-save-path)
+    (crossword-quit))
   (condition-case nil
     (select-frame-by-name "Crossword")
     (error
@@ -2482,6 +2501,8 @@ the CAR of an element of `crossword-download-puz-alist'. Optional
 arg DATE is expected to be a list of integers '(mm dd yyy)."
   ;; TODO: Allow the arg 'from' to be url.
   (interactive)
+  (unless (crossword--check-and-create-save-path)
+    (user-error "No existing download path configured"))
   (let (entry url
         (save-dir (expand-file-name crossword-save-path)))
    (if from
@@ -2536,6 +2557,8 @@ From the puzzle browser one can load a puzzle to play by selecting
 it. The browser presents all puzzles' metadata including
 completion details of played puzzles."
   (interactive)
+  (unless (crossword--check-and-create-save-path)
+    (user-error "No existing download path configured"))
   (let ((choices
           (list (when (crossword--puzzle-file-list)
                   (cons "Use the local crossword browser" 'crossword-summary))

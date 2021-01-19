@@ -1,3 +1,11 @@
+2021-01-19  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.el (crossword--check-and-create-save-path): New function.
+	(crossword-summary, crossword-download, crossword): Use it.
+	(crossword-summary-rebuild-data): Check buffer exists before
+	killing it. [These solve github issue #1]
+	(crossword-summary-delete): Use new file name format.
+
 2021-01-18  Boruch Baum  <boruch_baum@gmx.com>
 
 	* crossword.el (crossword--summary-colophon-list)
