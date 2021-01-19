@@ -1,5 +1,14 @@
 2021-01-19  Boruch Baum  <boruch_baum@gmx.com>
 
+	* crossword.el (crossword--window-resize-function): Handle resize events.
+	(crossword-summary): Use it.
+
+2021-01-19  Boruch Baum  <boruch_baum@gmx.com>
+
+	(crossword-mode, crossword--start-game): Insist on mono-space fonts.
+
+2021-01-19  Boruch Baum  <boruch_baum@gmx.com>
+
 	* crossword.el Changes throughout, for package linting, use #'
 	notation for functions, and prefer 'unless' to 'when not'
 	(crossword--download): Use 'curl' if 'wget' is unavailable.
