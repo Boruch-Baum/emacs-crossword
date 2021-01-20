@@ -416,11 +416,19 @@ NOTE: Support for this file format has not yet been written!"
 ;;; Faces
 
 (defface crossword-current-face
- '((t (:background "darkgreen" :foreground "black" :inherit 'normal)))
+ '((((class color) (background light))
+        (:background "lightgreen" :foreground "black" :inherit 'normal))
+   (((class color) (background dark))
+        (:background "darkgreen" :foreground "black" :inherit 'normal))
+   (t   (:background "darkgreen" :foreground "black" :inherit 'normal)))
  "For the current clue and word.")
 
 (defface crossword-other-dir-face
- '((t (:background "brightblack" :foreground "black" :inherit 'normal)))
+ '((((class color) (background light))
+        (:background "darkgrey" :foreground "black" :inherit 'normal))
+   (((class color) (background dark))
+        (:background "brightblack" :foreground "black" :inherit 'normal))
+   (t   (:background "brightblack" :foreground "black" :inherit 'normal)))
  "For the current clue and word.")
 
 
@@ -437,7 +445,11 @@ NOTE: Support for this file format has not yet been written!"
  "For a letter that has been checked and is correct.")
 
 (defface crossword-solved-face
- '((t (:foreground "brightyellow" :inherit 'normal)))
+ '((((class color) (background light))
+        (:background "cyan" :inherit 'normal))
+   (((class color) (background dark))
+        (:foreground "brightyellow" :inherit 'normal))
+   (t   (:foreground "brightyellow" :inherit 'normal)))
  "For a letter that the user has asked to be solved.")
 
 
@@ -868,9 +880,9 @@ If optional NODAY is t, does not ask for day, but just returns
 returned is \(month year).
 
 This function is (hopefully) a temporary replacement for function
-`calendar-read-date' of package calendar.el. See <--oops--> on
-the Emacs <--oops--> list for the relevant discussion and patch
-submission."
+`calendar-read-date' of package calendar.el. See 2018-07-09
+https://debbugs.gnu.org/cgi/bugreport.cgi?bug=32105 for the
+relevant discussion and patch submission."
   (let* ((today (calendar-current-date))
          (year (calendar-read
                 "Year (>0): "
@@ -2674,6 +2686,9 @@ completion details of played puzzles."
 ;;         One buffer each for across and down clues."
 ;;           :type  'bool
 ;;           :group 'crossword)
+
+;; TODO: Faces: It may be a bug how 'checked' is (not)used in favor of
+;;       'solved'
 
 ;; TODO: Fix annoying flickering of display when navigating.
 
