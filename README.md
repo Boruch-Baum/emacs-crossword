@@ -105,6 +105,12 @@
                    C-x C-s       crossword-backup
                    C-c C-x C-f   crossword-restore
 
+
+   If, while playing, you delete the crossword frame or one of its
+   windows, you can use command M-x `crossword-recover-game-in-progress`.
+   If you kill a clue buffer, you'll need to save, quit, and restore
+   the saved game.
+
    General navigation within the grid buffer should be intuitive, using
    all the usual keys. Additionally, filling in a square will advance
    `POINT` to the next sensible one. Grids begin with an 'across'

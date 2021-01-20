@@ -1,4 +1,15 @@
 2021-01-20  Boruch Baum  <boruch_baum@gmx.com>
+	* crossword.el (crossword--recover-game-in-progress): New function.
+	(crossword-summary, crossword-load, crossword): Use it.
+	(crossword-recover-game-in-progress): Interactive version.
+
+2021-01-20  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.el (crossword--select-frame): New consolidation
+	function. Set default frame width.
+	(crossword--start-game, crossword-summary): Use it.
+
+2021-01-20  Boruch Baum  <boruch_baum@gmx.com>
 
 	* crossword.el (crossword-current-face)
 	(crossword-other-dir-face, crossword-solved-face): Handle
@@ -6,8 +17,8 @@
 
 2021-01-19  Boruch Baum  <boruch_baum@gmx.com>
 
-	(crossword--summary-data-puz): Remove trim from split-string to
-	solve github issue #6.
+	* crossword.el (crossword--summary-data-puz): Remove trim from
+	split-string to solve github issue #6.
 
 2021-01-19  Boruch Baum  <boruch_baum@gmx.com>
 
@@ -16,22 +27,24 @@
 
 2021-01-19  Stefan Monnier <monnier@iro.umontreal.ca>
 
-	(crossword): Lint removal. Remove unnecessary 'group' from
-	defcustoms, define mode-map bindings separately from derived mode
-	function.
+	* crossword.el (crossword): Lint removal. Remove unnecessary
+	'group' from defcustoms, define mode-map bindings separately from
+	derived mode function.
 
 2021-01-19  Case Duckworth  <acdw@acdw.net>
-	(crossword--download): Correct the curl command list. Github PR#5,
-	related to issue #3
+	* crossword.el (crossword--download): Correct the curl command
+	list. Github PR#5, related to issue #3
 
 2021-01-19  Boruch Baum  <boruch_baum@gmx.com>
 
-	* crossword.el (crossword--window-resize-function): Handle resize events.
+	* crossword.el (crossword--window-resize-function): Handle resize
+	events.
 	(crossword-summary): Use it.
 
 2021-01-19  Boruch Baum  <boruch_baum@gmx.com>
 
-	(crossword-mode, crossword--start-game): Insist on mono-space fonts.
+	* crossword.el (crossword-mode, crossword--start-game): Insist on
+	mono-space fonts.
 
 2021-01-19  Boruch Baum  <boruch_baum@gmx.com>
 
@@ -41,12 +54,13 @@
 
 2021-01-19  Paul W. Rankin  <pwr@bydasein.com>
 
-	(crossword): Define parent customization group as 'games' (github
-	PR#2, github user: rnkn)
+	* crossword.el (crossword): Define parent customization group as
+	'games' (github PR#2, github user: rnkn)
 
 2021-01-19  Boruch Baum  <boruch_baum@gmx.com>
 
-	* crossword.el (crossword--check-and-create-save-path): New function.
+	* crossword.el (crossword--check-and-create-save-path): New
+	function.
 	(crossword-summary, crossword-download, crossword): Use it.
 	(crossword-summary-rebuild-data): Check buffer exists before
 	killing it. [These solve github issue #1]

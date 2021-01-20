@@ -143,6 +143,11 @@
 ;;                 C-x C-s       crossword-backup
 ;;                 C-c C-x C-f   crossword-restore
 ;;
+;; If, while playing, you delete the crossword frame or one of its
+;; windows, you can use command M-x `crossword-recover-game-in-progress'.
+;; If you kill a clue buffer, you'll need to save, quit, and restore
+;; the saved game.
+;;
 ;; General navigation within the grid buffer should be intuitive, using
 ;; all the usual keys. Additionally, filling in a square will advance
 ;; POINT to the next sensible one. Grids begin with an 'across'
@@ -915,34 +920,34 @@ FRAME is expected to be the `selected-frame'. This function is
 meant for variable `window-size-change-functions'. It rebalances
 the frame's three windows, auto-fills the contents of the two
 clue listing buffers, and updates the clue data-structures."
-)
-;;(when (equal "Crossword"
-;;             (cdr (assq 'name (frame-parameters frame))))
-;;;; (if window buffer is "Crossword list" then maybe print tabulated list ?
-;;  (balance-windows)
-;;  ;; snippet based upon part of function `crossword--start-game-puz'
-;;  (let ((grid-buffer      (set-buffer "Crossword grid"))
-;;        (across-buffer    crossword--across-buffer)
-;;        (down-buffer      crossword--down-buffer)
-;;        (across-clue-list crossword--across-clue-list)
-;;        (down-clue-list   crossword--down-clue-list)
-;;        (inhibit-read-only t))
-;;    (cl-flet ((strip2 (x) (mapcar (lambda (elem) (butlast elem 2)) x)))
-;;      (setq across-clue-list
-;;        (crossword--insert-clues across-buffer
-;;                                 'clue-across
-;;                                 (strip2 across-clue-list)
-;;                                 "--- Across clues for crossword"))
-;;      (setq down-clue-list
-;;        (crossword--insert-clues down-buffer
-;;                                 'clue-down
-;;                                 (strip2 down-clue-list)
-;;                                 "--- Down clues for crossword")))
-;;    ;; ** Finish in grid buffer
-;;    (set-buffer "Crossword grid")
-;;    (setq crossword--across-clue-list across-clue-list
-;;          crossword--down-clue-list   down-clue-list)
-;;    (crossword--update-faces 'force))))
+(when (and (equal "Crossword"
+                  (cdr (assq 'name (frame-parameters frame))))
+           (or (< emacs-major-version 27)
+               (not (minibuffer-window-active-p (active-minibuffer-window)))))
+  (balance-windows)
+  ;; snippet based upon part of function `crossword--start-game-puz'
+  (let ((grid-buffer      (set-buffer "Crossword grid"))
+        (across-buffer    crossword--across-buffer)
+        (down-buffer      crossword--down-buffer)
+        (across-clue-list crossword--across-clue-list)
+        (down-clue-list   crossword--down-clue-list)
+        (inhibit-read-only t))
+    (cl-flet ((strip2 (x) (mapcar (lambda (elem) (butlast elem 2)) x)))
+      (setq across-clue-list
+        (crossword--insert-clues across-buffer
+                                 'clue-across
+                                 (strip2 across-clue-list)
+                                 "--- Across clues for crossword"))
+      (setq down-clue-list
+        (crossword--insert-clues down-buffer
+                                 'clue-down
+                                 (strip2 down-clue-list)
+                                 "--- Down clues for crossword")))
+    ;; ** Finish in grid buffer
+    (set-buffer "Crossword grid")
+    (setq crossword--across-clue-list across-clue-list
+          crossword--down-clue-list   down-clue-list)
+    (crossword--update-faces 'force))))
 
 
 (defun crossword--pre-insert ()
@@ -1371,6 +1376,61 @@ header line."
     (nreverse new-clue-list)))
 
 
+(defun crossword--select-frame ()
+  "Select the \"Crossword\" frame, possibly creating it."
+  (unless (equal (frame-parameter nil 'name) "Crossword")
+    (condition-case nil
+      (select-frame-by-name "Crossword")
+      (error (select-frame
+               (make-frame (list '(name   . "Crossword")
+                                 '(menu-bar-lines .  0)
+                                 '(tool-bar-lines .  0)
+                                 '(height .  43)
+                                 '(width  . 140))))))))
+
+
+(defun crossword--recover-game-in-progress ()
+  "Restore frame, windows, and buffers of a game in progress.
+If no game is in progress, returns to caller, otherwise signals a
+`user-error'."
+  (let ((grid-buffer (get-buffer "Crossword grid"))
+        grid-window across-window down-window)
+    (when grid-buffer
+      (message "Game in progress. Restoring...")
+;;    ;; compare with `crossword--start-game' and consider consolidating code
+      (condition-case nil
+        (progn
+          (select-frame-by-name "Crossword")
+          (delete-frame nil 'force))
+        (error nil))
+      (crossword--select-frame)
+      (delete-other-windows)
+      (setq grid-window   (selected-window)
+            across-window (split-window-right)
+            down-window   (split-window-right))
+      (set-window-dedicated-p nil nil)
+      (switch-to-buffer grid-buffer 'norecord 'force)
+      (set-window-dedicated-p nil t)
+      (select-window across-window)
+      (set-window-dedicated-p nil nil)
+      (buffer-disable-undo
+        (switch-to-buffer
+          (setq crossword--across-buffer
+            (get-buffer-create  "Crossword across"))
+          'norecord 'force))
+      (set-window-dedicated-p nil t)
+      (select-window down-window)
+      (set-window-dedicated-p nil nil)
+      (buffer-disable-undo
+        (switch-to-buffer
+          (setq crossword--down-buffer
+            (get-buffer-create  "Crossword down"))
+          'norecord 'force))
+      (set-window-dedicated-p nil t)
+      (user-error "Game in progress. Restoring... complete"))))
+;; BUG creates scratch buffer window
+
+
 (defun crossword--start-game-puz (puz-file grid-window)
   "Parse PUZ-FILE for '.puz' format file and begins play.
 GRID-WINDOW is the dedicated crossword-grid window."
@@ -1458,7 +1518,8 @@ puzzle's clues."
      (while (not (file-readable-p
                    (setq puz-file
                      (read-file-name "Puzzle file: " nil nil t nil))))))
-   (select-frame (make-frame (list '(name . "Crossword"))))
+   (crossword--select-frame)
+   (set-window-dedicated-p nil nil)
 ;; FIXME: see TODO note at end of file
 ;; (setq delete-frame-functions (list #'crossword-quit))
    (setq window-size-change-functions
@@ -2500,6 +2561,17 @@ Default is to advance one column."
     (crossword--start-game puz-file)))
 
 
+(defun crossword-recover-game-in-progress ()
+  "Attempt to recover an 'deleted' game.
+In this context, 'deleted' means that either the frame or its
+clue buffer(s) was/were deleted.
+
+At present, if a clue buffer is deleted, the recovery procedure
+is to save, quit, and restart the game. "
+  (interactive)
+  (crossword--recover-game-in-progress))
+
+
 (defun crossword-quit ()
   "Gracefully exit crossword play.
 Prompt to save current state, then kill buffers, windows, and frame."
@@ -2519,14 +2591,17 @@ Prompt to save current state, then kill buffers, windows, and frame."
   (message "")
   (advice-remove 'self-insert-command #'crossword--advice-before-self-insert-command_1)
   (advice-remove 'self-insert-command #'crossword--advice-before-self-insert-command_2)
-  (let ((crossword-quit-to-browser
-          (unless (equal "Crossword list" (buffer-name))
-            crossword-quit-to-browser))
-         buf)
-    (dolist (buf-str '("Crossword across"
-                       "Crossword down"
-                       "Crossword list"
-                       "Crossword temporary"))
+  (let* ((the-list-buffer "Crossword list")
+         (crossword-quit-to-browser
+           (unless (equal the-list-buffer (buffer-name))
+             crossword-quit-to-browser))
+         (bufs (list "Crossword across"
+                     "Crossword down"
+                     "Crossword temporary"))
+          buf)
+    (unless crossword-quit-to-browser
+      (push the-list-buffer bufs))
+    (dolist (buf-str bufs)
       (when (setq buf (get-buffer buf-str))
         (kill-buffer buf)))
     (when (and (called-interactively-p 'interactive)
@@ -2555,14 +2630,10 @@ on their entry."
   (interactive)
   (unless (crossword--check-and-create-save-path)
     (crossword-quit))
-  (condition-case nil
-    (select-frame-by-name "Crossword")
-    (error
-      (select-frame (make-frame (list '(name . "Crossword"))))))
+  (crossword--select-frame)
 ;; FIXME: see TODO note at end of file
 ;;    (setq delete-frame-functions #'crossword-quit)))
-  (when (get-buffer "Crossword grid")
-    (user-error "Game in progress"))
+  (crossword--recover-game-in-progress)
   (unless (get-buffer "Crossword list")
     (set-window-dedicated-p nil nil)
     (pop-to-buffer (set-buffer (get-buffer-create "Crossword list")))
@@ -2626,6 +2697,7 @@ want to keep it in its current location. If you've used
 `crossword-download' to get a puzzle, it should appear in the
 puzzle browser when the download completes."
   (interactive)
+  (crossword--recover-game-in-progress)
   (condition-case nil
     (select-frame-by-name "Crossword")
     (error
@@ -2643,6 +2715,7 @@ From the puzzle browser one can load a puzzle to play by selecting
 it. The browser presents all puzzles' metadata including
 completion details of played puzzles."
   (interactive)
+  (crossword--recover-game-in-progress)
   (unless (crossword--check-and-create-save-path)
     (user-error "No existing download path configured"))
   (let ((choices
