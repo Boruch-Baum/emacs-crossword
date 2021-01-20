@@ -301,6 +301,7 @@
 (require 'tabulated-list) ;; for tabulated list mode
 (require 'hl-line)        ;; for hl-line-mode
 (require 'calendar)       ;; for calendar-read and related functions
+(require 'cl-macs)        ;; for cl-loop
 
 
 
@@ -573,6 +574,10 @@ either 'across or 'down.")
     (define-key map (kbd "M-<prior>")    'crossword-clue-scroll-page-down)
     (define-key map (kbd "M-<home>")      'crossword-clue-scroll-page-home)
     (define-key map (kbd "M-<end>")       'crossword-clue-scroll-page-end)
+
+    (cl-loop for key in (append (number-sequence ?a ?z) (number-sequence ?A ?Z))
+             do (define-key map (string key) 'crossword-self-insert))
+
     map))
 
 
@@ -593,12 +598,7 @@ either 'across or 'down.")
 \\{crossword-mode-map}"
   (add-hook 'post-command-hook #'crossword--update-faces t t)
   (overwrite-mode)
-  (face-remap-add-relative 'default :family "Monospace")
-  (advice-add #'self-insert-command :before
-              (if (< emacs-major-version 27)
-                #'crossword--advice-before-self-insert-command_1
-               #'crossword--advice-before-self-insert-command_2)))
-
+  (face-remap-add-relative 'default :family "Monospace"))
 
 (define-derived-mode crossword-summary-mode tabulated-list-mode
   "Known crossword puzzles"
@@ -831,19 +831,6 @@ See mode `crossword-summary-mode'."
 
 
 ;;
-;;; Advice functions
-
-(defun crossword--advice-before-self-insert-command_2 (_N _C)
-  "Advice for Emacs versions taking two args _N and _C."
-  (crossword--pre-insert))
-
-(defun crossword--advice-before-self-insert-command_1 (_N)
-  "Advice for Emacs versions taking a single arg _N."
-  (crossword--pre-insert))
-
-
-
-;;
 ;;; Internal functions
 
 
@@ -933,43 +920,29 @@ clue listing buffers, and updates the clue data-structures."
 ;;    (crossword--update-faces 'force))))
 
 
-(defun crossword--pre-insert ()
+(defun crossword-self-insert (char)
   "Handle insertions for the 'Crossword grid' buffer.
 
-This function is meant to be called *indirectly* as an advice
-:before `self-insert-command'. It is done indirectly because
-while this function needs no arguments, the advised function
-does: For Emacs v26 that command takes a single argument, and for
-Emacs v28(snapshot) it takes two.
-
-The function is somewhat of a kludge, which is a shame since it's
-the central-most part of the package, as it controls data-entry,
-fontification, advances POINT to the next grid position, and
-updates the puzzle's completion statistics. The kludge works
-because it sets variable `last-input-event' to nil after using
-its value, and because it exits with function `keyboard-quit' to
-abort the advised function from ever actually being called. Note
-that this has the unwanted side effect of sending \"Quit\"
-messages to the echo are and to the messages buffer."
+This function is the central-most part of the package.  It
+controls data-entry, fontification, advances POINT to the next
+grid position, and updates the puzzle's completion statistics."
+  (interactive (list last-input-event))
   (when (and (eq major-mode 'crossword-mode)
              (get-text-property (point) 'answer)
              (not (get-text-property (point) 'solved)))
-    (crossword--insert-char)
+    (crossword--insert-char char)
     (if crossword-auto-nav-only-within-clue
-      (crossword--next-square-in-clue 'wrap)
-     (crossword--next-logical-square))
-    (keyboard-quit)))
+        (crossword--next-square-in-clue 'wrap)
+      (crossword--next-logical-square))))
 
-
-(defun crossword--insert-char ()
+(defun crossword--insert-char (char)
   "Insert a character into a crossword grid square."
     (let ((inhibit-read-only t)
-          (char-to-insert (upcase (char-to-string last-input-event)))
+          (char-to-insert (upcase (string char)))
           (char-current (buffer-substring-no-properties (point) (1+ (point))))
           (face-at-point (get-text-property (point) 'face))
           (goto-pos (point)))
-      (setq last-input-event nil)
-      ;; ** Update puzzle completion sattistics
+      ;; ** Update puzzle completion stastics
       (cond
        ((string-match "[[:upper:]]" char-to-insert)
         (unless (string-match "[[:upper:]]" char-current)
@@ -2041,8 +2014,7 @@ Use a prefix argument for navigating more than position."
 Optionally, repeat ARG times."
   (interactive "p")
   (dotimes (_n arg)
-    (setq last-input-event 32)
-    (crossword--insert-char)
+    (crossword--insert-char 32)
     (if (not crossword-auto-nav-only-within-clue)
       (crossword--next-logical-square)
      (let* ((pos (point))
@@ -2058,8 +2030,7 @@ Optionally, repeat ARG times."
 Optionally, repeat ARG times."
   (interactive "p")
   (dotimes (_n arg)
-    (setq last-input-event 32)
-    (crossword--insert-char)
+    (crossword--insert-char 32)
     (if crossword-auto-nav-only-within-clue
       (crossword--prev-square-in-clue)
      (crossword--prev-logical-square))))
@@ -2337,10 +2308,9 @@ It will highlighted per `crossword-solved-face'."
          (pos (point))
          (answer (get-text-property pos 'answer)))
     (when answer
-      (setq last-input-event (string-to-char answer))
       (put-text-property pos (1+ pos) 'face 'crossword-solved-face)
       (put-text-property pos (1+ pos) 'solved t)
-      (crossword--insert-char))))
+      (crossword--insert-char (string-to-char answer)))))
 
 
 (defun crossword-solve-word ()
@@ -2505,8 +2475,6 @@ Prompt to save current state, then kill buffers, windows, and frame."
         (prin1 data)
         (write-region nil nil (crossword--summary-file) 'append))))
   (message "")
-  (advice-remove 'self-insert-command #'crossword--advice-before-self-insert-command_1)
-  (advice-remove 'self-insert-command #'crossword--advice-before-self-insert-command_2)
   (let ((crossword-quit-to-browser
           (unless (equal "Crossword list" (buffer-name))
             crossword-quit-to-browser))
