@@ -86,8 +86,8 @@
 ;;  `crossword-wrap-on-entry-or-nav', `crossword-tab-to-next-unfilled'
 ;;  `crossword-auto-nav-only-within-clue'.
 
-;;  If don't usually play more than one crossword in a sitting, you
-;;  may want to set `crossword-quit-to-browser' to NIL to save
+;;  If you don't usually play more than one crossword in a sitting,
+;;  you may want to set `crossword-quit-to-browser' to NIL to save
 ;;  yourself a keystroke on exit.
 
 ;;  You can also customize the download sources to be used for network
@@ -428,6 +428,7 @@ NOTE: Support for this file format has not yet been written!"
    (t   (:background "darkgreen" :foreground "black" :inherit 'normal)))
  "For the current clue and word.")
 
+
 (defface crossword-other-dir-face
  '((((class color) (background light))
         (:background "darkgrey" :foreground "black" :inherit 'normal))
@@ -441,13 +442,16 @@ NOTE: Support for this file format has not yet been written!"
  '((t (:background "red" :foreground "black" :inherit 'normal)))
  "For a letter that has been checked and is wrong.")
 
+
 (defface crossword-error-inverse-face
  '((t (:inverse-video t :inherit 'crossword-error-face)))
  "For a letter that has been checked and is wrong.")
 
+
 (defface crossword-checked-face
  '((t (:foreground "cyan" :inherit 'normal)))
  "For a letter that has been checked and is correct.")
+
 
 (defface crossword-solved-face
  '((((class color) (background light))
@@ -456,6 +460,16 @@ NOTE: Support for this file format has not yet been written!"
         (:foreground "brightyellow" :inherit 'normal))
    (t   (:foreground "brightyellow" :inherit 'normal)))
  "For a letter that the user has asked to be solved.")
+
+
+(defface crossword-grid-face
+ '((((class color) (background light))
+        (:foreground "blue" :inherit 'normal))
+   (((class color) (background dark))
+        (:foreground "blue" :inherit 'normal))
+   (t   (:foreground "blue" :inherit 'normal)))
+ "For un-writable squares and grid-lines.")
+
 
 
 ;;
@@ -1259,12 +1273,21 @@ variables `crossword--across-clue-list' and
 `crossword--down-clue-list'. GRID-WIDTH is an integer taken from
 the puzzle file encoding. COLOPHON, CLEAN-GRID, ANSWER-GRID and CLUE-LIST
 are substrings of the puzzle file."
-  (let* ((block-cell (concat crossword-empty-position-char "|"))
-         (crossword-new-line (concat block-cell "\n|" block-cell))
+  (let* ((divider "|")
+         (block-cell (concat crossword-empty-position-char divider))
          (block-line
            (concat (replace-regexp-in-string
                       "-" block-cell
                       (make-string (+ 1 grid-width) ?-))))
+         ;; FIXME: This does not work with lexical binding, so for now the
+         ;;        propertizing is done individually with the let*.
+         ;; (dolist (var (list 'divider 'block-cell 'crossword-new-line 'block-line))
+         ;;   (set var (propertize (symbol-value var) 'face 'crossword-grid-face)))
+         (divider    (propertize divider 'face 'crossword-grid-face))
+         (block-cell (propertize block-cell 'face 'crossword-grid-face))
+         (block-line (propertize block-line 'face 'crossword-grid-face))
+         ;; END: FIXME
+         (crossword-new-line (concat block-cell "\n" divider block-cell))
          (clue-across 0)
          (clue-down 0)
          start-pos pos)
@@ -1286,7 +1309,7 @@ are substrings of the puzzle file."
           crossword--solved-percent-pos     (+ 52 start-pos)
           crossword--checked-count-pos      (+ 77 start-pos)
           crossword--error-count-pos        (+ 90 start-pos))
-    (insert "|" block-line)
+    (insert divider block-line)
     (insert crossword-new-line)
     (setq start-pos (point)
           pos start-pos)
@@ -1298,7 +1321,7 @@ are substrings of the puzzle file."
     (insert block-line)
     (goto-char start-pos)
     (while (search-forward "-" nil t)
-       (insert "|"))
+       (insert divider))
     (when (and crossword-empty-position-char
                (= 1 (length crossword-empty-position-char)))
       (goto-char start-pos)

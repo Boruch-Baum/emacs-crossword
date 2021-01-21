@@ -53,8 +53,8 @@
    `crossword-wrap-on-entry-or-nav`, `crossword-tab-to-next-unfilled`,
    `crossword-auto-nav-only-within-clue`.
 
-   If don't usually play more than one crossword in a sitting, you
-   may want to set `crossword-quit-to-browser` to `NIL` to save
+   If you don't usually play more than one crossword in a sitting,
+   you may want to set `crossword-quit-to-browser` to `NIL` to save
    yourself a keystroke on exit.
 
    There are also several 'faces' defined to allow custom colorization

@@ -1,5 +1,10 @@
 2021-01-21  Boruch Baum  <boruch_baum@gmx.com>
 
+	* crossword.el (crossword-grid-face): New face.
+	(crossword--insert-grid): Use it.
+
+2021-01-21  Boruch Baum  <boruch_baum@gmx.com>
+
 	* crossword.el (crossword--window-resize-function): Fix for
 	kill-buffer bug.
 
