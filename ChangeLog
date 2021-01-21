@@ -1,3 +1,14 @@
+2021-01-21  Boruch Baum  <boruch_baum@gmx.com>
+
+	Closes github issue #9, #10.
+	* crossword.el (crossword--advice-before-self-insert-command):
+	Combine version-specific advices by adding &optional arg.
+	(crossword--pre-insert)
+	(crossword--advice-before-self-insert-command_1)
+	(crossword--advice-before-self-insert-command_2): Now unnecessary.
+	Deleted.
+	(crossword-quit, crossword-mode): Use new function.
+
 2021-01-20  Boruch Baum  <boruch_baum@gmx.com>
 	* crossword.el (crossword--recover-game-in-progress): New function.
 	(crossword-summary, crossword-load, crossword): Use it.

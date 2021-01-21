@@ -605,16 +605,15 @@ either 'across or 'down.")
     (define-key map (kbd "S")      'crossword-summary-sort)
     map))
 
+
 (define-derived-mode crossword-mode fundamental-mode "Crossword"
   "Operate on puz file format crossword puzzles.
 \\{crossword-mode-map}"
   (add-hook 'post-command-hook #'crossword--update-faces t t)
   (overwrite-mode)
   (face-remap-add-relative 'default :family "Monospace")
-  (advice-add #'self-insert-command :before
-              (if (< emacs-major-version 27)
-                #'crossword--advice-before-self-insert-command_1
-               #'crossword--advice-before-self-insert-command_2)))
+  (advice-add #'self-insert-command
+              :before #'crossword--advice-before-self-insert-command))
 
 
 (define-derived-mode crossword-summary-mode tabulated-list-mode
@@ -850,13 +849,30 @@ See mode `crossword-summary-mode'."
 ;;
 ;;; Advice functions
 
-(defun crossword--advice-before-self-insert-command_2 (_N _C)
-  "Advice for Emacs versions taking two args _N and _C."
-  (crossword--pre-insert))
+(defun crossword--advice-before-self-insert-command (_N &optional _C)
+  "Advice for handling insertions in the 'Crossword grid' buffer.
 
-(defun crossword--advice-before-self-insert-command_1 (_N)
-  "Advice for Emacs versions taking a single arg _N."
-  (crossword--pre-insert))
+While this function needs no arguments, the advised function
+does: For Emacs v26 that command takes a single argument _N, and for
+Emacs v28(snapshot) it takes an additional optional _C.
+
+The function is somewhat of a kludge, which is a shame since it's
+the central-most part of the package, as it controls data-entry,
+fontification, advances POINT to the next grid position, and
+updates the puzzle's completion statistics. The kludge works
+because it sets variable `last-input-event' to nil after using
+its value, and because it exits with function `keyboard-quit' to
+abort the advised function from ever actually being called. Note
+that this has the unwanted side effect of sending \"Quit\"
+messages to the echo are and to the messages buffer."
+  (when (and (eq major-mode 'crossword-mode)
+             (get-text-property (point) 'answer)
+             (not (get-text-property (point) 'solved)))
+    (crossword--insert-char)
+    (if crossword-auto-nav-only-within-clue
+      (crossword--next-square-in-clue 'wrap)
+     (crossword--next-logical-square))
+    (keyboard-quit)))
 
 
 
@@ -887,7 +903,9 @@ returned is \(month year).
 This function is (hopefully) a temporary replacement for function
 `calendar-read-date' of package calendar.el. See 2018-07-09
 https://debbugs.gnu.org/cgi/bugreport.cgi?bug=32105 for the
-relevant discussion and patch submission."
+relevant discussion and patch submission. As of 2021-01-20, a
+patch was applied to emacs28snaphot, so consider beginning to
+deprecate sometime after that version is released."
   (let* ((today (calendar-current-date))
          (year (calendar-read
                 "Year (>0): "
@@ -944,38 +962,10 @@ clue listing buffers, and updates the clue data-structures."
                                  (strip2 down-clue-list)
                                  "--- Down clues for crossword")))
     ;; ** Finish in grid buffer
-    (set-buffer "Crossword grid")
+    (set-buffer grid-buffer)
     (setq crossword--across-clue-list across-clue-list
           crossword--down-clue-list   down-clue-list)
     (crossword--update-faces 'force))))
-
-
-(defun crossword--pre-insert ()
-  "Handle insertions for the 'Crossword grid' buffer.
-
-This function is meant to be called *indirectly* as an advice
-:before `self-insert-command'. It is done indirectly because
-while this function needs no arguments, the advised function
-does: For Emacs v26 that command takes a single argument, and for
-Emacs v28(snapshot) it takes two.
-
-The function is somewhat of a kludge, which is a shame since it's
-the central-most part of the package, as it controls data-entry,
-fontification, advances POINT to the next grid position, and
-updates the puzzle's completion statistics. The kludge works
-because it sets variable `last-input-event' to nil after using
-its value, and because it exits with function `keyboard-quit' to
-abort the advised function from ever actually being called. Note
-that this has the unwanted side effect of sending \"Quit\"
-messages to the echo are and to the messages buffer."
-  (when (and (eq major-mode 'crossword-mode)
-             (get-text-property (point) 'answer)
-             (not (get-text-property (point) 'solved)))
-    (crossword--insert-char)
-    (if crossword-auto-nav-only-within-clue
-      (crossword--next-square-in-clue 'wrap)
-     (crossword--next-logical-square))
-    (keyboard-quit)))
 
 
 (defun crossword--insert-char ()
@@ -2589,8 +2579,7 @@ Prompt to save current state, then kill buffers, windows, and frame."
         (prin1 data)
         (write-region nil nil (crossword--summary-file) 'append))))
   (message "")
-  (advice-remove 'self-insert-command #'crossword--advice-before-self-insert-command_1)
-  (advice-remove 'self-insert-command #'crossword--advice-before-self-insert-command_2)
+  (advice-remove 'self-insert-command #'crossword--advice-before-self-insert-command)
   (let* ((the-list-buffer "Crossword list")
          (crossword-quit-to-browser
            (unless (equal the-list-buffer (buffer-name))
