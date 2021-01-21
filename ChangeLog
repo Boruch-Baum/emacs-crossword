@@ -1,5 +1,10 @@
 2021-01-21  Boruch Baum  <boruch_baum@gmx.com>
 
+	* crossword.el (crossword--window-resize-function): Fix for
+	kill-buffer bug.
+
+2021-01-21  Boruch Baum  <boruch_baum@gmx.com>
+
 	Closes github issue #9, #10.
 	* crossword.el (crossword--advice-before-self-insert-command):
 	Combine version-specific advices by adding &optional arg.

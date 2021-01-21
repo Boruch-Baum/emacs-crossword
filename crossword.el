@@ -944,28 +944,30 @@ clue listing buffers, and updates the clue data-structures."
                (not (minibuffer-window-active-p (active-minibuffer-window)))))
   (balance-windows)
   ;; snippet based upon part of function `crossword--start-game-puz'
-  (let ((grid-buffer      (set-buffer "Crossword grid"))
+  (let (grid-buffer
         (across-buffer    crossword--across-buffer)
         (down-buffer      crossword--down-buffer)
         (across-clue-list crossword--across-clue-list)
         (down-clue-list   crossword--down-clue-list)
         (inhibit-read-only t))
-    (cl-flet ((strip2 (x) (mapcar (lambda (elem) (butlast elem 2)) x)))
-      (setq across-clue-list
-        (crossword--insert-clues across-buffer
-                                 'clue-across
-                                 (strip2 across-clue-list)
-                                 "--- Across clues for crossword"))
-      (setq down-clue-list
-        (crossword--insert-clues down-buffer
-                                 'clue-down
-                                 (strip2 down-clue-list)
-                                 "--- Down clues for crossword")))
-    ;; ** Finish in grid buffer
-    (set-buffer grid-buffer)
-    (setq crossword--across-clue-list across-clue-list
-          crossword--down-clue-list   down-clue-list)
-    (crossword--update-faces 'force))))
+    (when (setq grid-buffer (get-buffer "Crossword grid"))
+      (set-buffer grid-buffer)
+      (cl-flet ((strip2 (x) (mapcar (lambda (elem) (butlast elem 2)) x)))
+        (setq across-clue-list
+          (crossword--insert-clues across-buffer
+                                   'clue-across
+                                   (strip2 across-clue-list)
+                                   "--- Across clues for crossword"))
+        (setq down-clue-list
+          (crossword--insert-clues down-buffer
+                                   'clue-down
+                                   (strip2 down-clue-list)
+                                   "--- Down clues for crossword")))
+      ;; ** Finish in grid buffer
+      (set-buffer grid-buffer)
+      (setq crossword--across-clue-list across-clue-list
+            crossword--down-clue-list   down-clue-list)
+      (crossword--update-faces 'force)))))
 
 
 (defun crossword--insert-char ()
