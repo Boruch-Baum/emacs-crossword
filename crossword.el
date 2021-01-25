@@ -387,7 +387,7 @@ could be several fields distant."
      "http://herbach.dnsalias.com/uc/uc<YY><MM><DD>.puz")
   ("Universal Daily (Sunday bonus, 21x21)"
      "http://herbach.dnsalias.com/uc/ucs<YY><MM><DD>.puz")
-  ("Wall Street Journal (Mondays-Saturddays)"
+  ("Wall Street Journal (Mondays-Saturdays)"
      "http://herbach.dnsalias.com/wsj/wsj<YY><MM><DD>.puz")
   ("Washington Post (Sundays)"
      "http://herbach.dnsalias.com/WaPo/wp<YY><MM><DD>.puz")
@@ -1292,6 +1292,7 @@ are substrings of the puzzle file."
          (clue-down 0)
          start-pos pos)
     (insert " " colophon "\n")
+    (decode-coding-region (point-min) (point-max) 'prefer-utf-8-dos)
     (setq start-pos (point))
     (setq crossword--total-count
       (cl-loop with start = 0
@@ -1383,6 +1384,7 @@ header line."
       (insert (propertize (format "%3s  %s\n\n" (car clue) (cadr clue))
                           prop (car clue)))
       (fill-region pos (point))
+      (decode-coding-region pos (point) 'prefer-utf-8-dos)
       (setq new-clue-data (append clue (list pos (1- (point)))))
       (push new-clue-data new-clue-list)
       (setq pos (point)))
@@ -1455,7 +1457,7 @@ GRID-WINDOW is the dedicated crossword-grid window."
         colophon clean-grid answer-grid
         clue-list across-clue-list down-clue-list)
    (select-window grid-window 'norecord) ;; FIXME: should be unnecessary, remove
-   (insert-file-contents-literally (setq crossword--filename puz-file))
+   (insert-file-contents (setq crossword--filename puz-file))
    ;; ** Sanity checks for 'puz' file format
    (cond
     ((not (string= "ACROSS&DOWN" (buffer-substring-no-properties 3 14)))
@@ -1478,8 +1480,7 @@ GRID-WINDOW is the dedicated crossword-grid window."
    (goto-char 1)
    (forward-line 3)
    (setq colophon
-     (replace-regexp-in-string  "\xa9" "©"
-       (replace-regexp-in-string "\n" "\n " (buffer-substring 1 (point)))))
+     (replace-regexp-in-string "\n" "\n " (buffer-substring 1 (point))))
    (delete-region 1 (point))
    (setq clue-list
      (split-string (buffer-substring 1 (point-max)) "\n"))
@@ -2778,6 +2779,13 @@ completion details of played puzzles."
 ;;       'solved'
 
 ;; TODO: Fix annoying flickering of display when navigating.
+
+;; TODO: Unicode decoding: The puzzles so far seem to all be what
+;;       emacs calls either `prefer-utf-8-dos' for the purpose of
+;;       function `decode-coding-region'. So far, the commit of
+;;       2021-01-25 has been sufficient, as tested by the the
+;;       available puz data (all files for the copyright symbol,
+;;       jz180531 for ñ.
 
 ;; TODO: Support "scrambled" .puz files.
 ;;       The format includes an option for basic encryption of the
