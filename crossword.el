@@ -867,13 +867,12 @@ See mode `crossword-summary-mode'."
 ;;
 ;;; Advice functions
 
-(defun crossword--advice-around-self-insert-command (oldfun N &optional C)
+(defun crossword--advice-around-self-insert-command (oldfun &rest args)
   "Advice for handling insertions in the 'Crossword grid' buffer.
 
 While this function needs no arguments for itself, the advised
-function does: For Emacs v26 that command takes a single argument
-N, and for Emacs v28(snapshot) it takes an additional optional C.
-OLDFUN is the advised function, per function `advice-add'.
+function does: OLDFUN is the advised function, per function
+`advice-add' and ARGS are per function `self-insert-command'.
 
 This function is a central part of the package, as it controls
 data-entry, fontification, advances POINT to the next grid
@@ -882,7 +881,7 @@ position, and updates the puzzle's completion statistics."
              (eq major-mode 'crossword-mode)
              (get-text-property (point) 'answer)
              (not (get-text-property (point) 'solved))))
-    (apply oldfun N C)
+    (apply oldfun args)
    (setq crossword--called-interactively-p nil)
    (crossword--insert-char)
    (if crossword-auto-nav-only-within-clue
@@ -890,17 +889,17 @@ position, and updates the puzzle's completion statistics."
     (crossword--next-logical-square))))
 
 
-(defun crossword--advice-around-call-interactively (oldfun func
-                                                    &optional record-flag keys)
+(defun crossword--advice-around-call-interactively (oldfun func &rest args)
   "Possibly set variable `crossword--called-interactively-p'.
 This is necessary to enable advising around
-`self-insert-command'."
+`self-insert-command'. OLDFUN is the advised function, per function
+`advice-add' and FUNC and ARGS are per function `call-interactively'."
   (when  (and (eq func 'self-insert-command)
               (eq major-mode 'crossword-mode)
               (get-text-property (point) 'answer)
               (not (get-text-property (point) 'solved)))
     (setq crossword--called-interactively-p t))
-  (apply oldfun func record-flag keys))
+  (apply oldfun func args))
 
 
 

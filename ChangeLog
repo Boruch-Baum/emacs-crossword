@@ -1,5 +1,11 @@
 2021-01-25  Boruch Baum  <boruch_baum@gmx.com>
 
+	(crossword--advice-around-self-insert-command)
+	(crossword--advice-around-call-interactively): Use correct
+	standard for advice arg list.
+
+2021-01-25  Boruch Baum  <boruch_baum@gmx.com>
+
 	* crossword.el (crossword--calendar-read-date): Make consistent
 	with function encode-time, remove arg 'noday'.
 	(crossword-download): Use encode-time and format-time-string
