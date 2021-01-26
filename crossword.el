@@ -556,6 +556,8 @@ either 'across or 'down.")
 (defvar-local crossword--local-proc nil
   "Stores a process object for a download.")
 
+(defvar-local crossword--called-interactively-p nil
+  "Record if containing function was called interactively.")
 
 
 ;;
@@ -627,7 +629,9 @@ either 'across or 'down.")
   (overwrite-mode)
   (face-remap-add-relative 'default :family "Monospace")
   (advice-add #'self-insert-command
-              :before #'crossword--advice-before-self-insert-command))
+              :around #'crossword--advice-around-self-insert-command)
+  (advice-add #'call-interactively
+              :around #'crossword--advice-around-call-interactively))
 
 
 (define-derived-mode crossword-summary-mode tabulated-list-mode
@@ -863,30 +867,40 @@ See mode `crossword-summary-mode'."
 ;;
 ;;; Advice functions
 
-(defun crossword--advice-before-self-insert-command (_N &optional _C)
+(defun crossword--advice-around-self-insert-command (oldfun N &optional C)
   "Advice for handling insertions in the 'Crossword grid' buffer.
 
-While this function needs no arguments, the advised function
-does: For Emacs v26 that command takes a single argument _N, and for
-Emacs v28(snapshot) it takes an additional optional _C.
+While this function needs no arguments for itself, the advised
+function does: For Emacs v26 that command takes a single argument
+N, and for Emacs v28(snapshot) it takes an additional optional C.
+OLDFUN is the advised function, per function `advice-add'.
 
-The function is somewhat of a kludge, which is a shame since it's
-the central-most part of the package, as it controls data-entry,
-fontification, advances POINT to the next grid position, and
-updates the puzzle's completion statistics. The kludge works
-because it sets variable `last-input-event' to nil after using
-its value, and because it exits with function `keyboard-quit' to
-abort the advised function from ever actually being called. Note
-that this has the unwanted side effect of sending \"Quit\"
-messages to the echo are and to the messages buffer."
-  (when (and (eq major-mode 'crossword-mode)
+This function is a central part of the package, as it controls
+data-entry, fontification, advances POINT to the next grid
+position, and updates the puzzle's completion statistics."
+  (if (not (and crossword--called-interactively-p
+             (eq major-mode 'crossword-mode)
              (get-text-property (point) 'answer)
-             (not (get-text-property (point) 'solved)))
-    (crossword--insert-char)
-    (if crossword-auto-nav-only-within-clue
-      (crossword--next-square-in-clue 'wrap)
-     (crossword--next-logical-square))
-    (keyboard-quit)))
+             (not (get-text-property (point) 'solved))))
+    (apply oldfun N C)
+   (setq crossword--called-interactively-p nil)
+   (crossword--insert-char)
+   (if crossword-auto-nav-only-within-clue
+     (crossword--next-square-in-clue 'wrap)
+    (crossword--next-logical-square))))
+
+
+(defun crossword--advice-around-call-interactively (oldfun func
+                                                    &optional record-flag keys)
+  "Possibly set variable `crossword--called-interactively-p'.
+This is necessary to enable advising around
+`self-insert-command'."
+  (when  (and (eq func 'self-insert-command)
+              (eq major-mode 'crossword-mode)
+              (get-text-property (point) 'answer)
+              (not (get-text-property (point) 'solved)))
+    (setq crossword--called-interactively-p t))
+  (apply oldfun func record-flag keys))
 
 
 
@@ -984,7 +998,15 @@ clue listing buffers, and updates the clue data-structures."
 
 
 (defun crossword--insert-char ()
-  "Insert a character into a crossword grid square."
+  "Insert a character into a crossword grid square.
+Update the puzzle's completion statistics, and fontify the
+character as needed.
+
+The function, as a major component of function
+`crossword--advice-around-self-insert-command', is a central part
+of `crossword', as it controls data-entry, fontification, and
+updates the puzzle's completion statistics. It works because it
+sets variable `last-input-event' to nil after using its value."
     (let ((inhibit-read-only t)
           (char-to-insert (upcase (char-to-string last-input-event)))
           (char-current (buffer-substring-no-properties (point) (1+ (point))))
@@ -2604,7 +2626,8 @@ Prompt to save current state, then kill buffers, windows, and frame."
         (prin1 data)
         (write-region nil nil (crossword--summary-file) 'append))))
   (message "")
-  (advice-remove 'self-insert-command #'crossword--advice-before-self-insert-command)
+  (advice-remove #'self-insert-command #'crossword--advice-around-self-insert-command)
+  (advice-remove #'call-interactively  #'crossword--advice-around-call-interactively)
   (let* ((the-list-buffer "Crossword list")
          (crossword-quit-to-browser
            (unless (equal the-list-buffer (buffer-name))
@@ -2778,6 +2801,8 @@ completion details of played puzzles."
 ;;       'solved'
 
 ;; TODO: Fix annoying flickering of display when navigating.
+;;       NOTE: Problem does not exist in emacs28snaphot. Condition is
+;;       emacs27 is unknown.
 
 ;; TODO: Unicode decoding: The puzzles so far seem to all be what
 ;;       emacs calls either `prefer-utf-8-dos' for the purpose of

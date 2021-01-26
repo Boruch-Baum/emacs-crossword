@@ -1,5 +1,13 @@
 2021-01-25  Boruch Baum  <boruch_baum@gmx.com>
 
+	* crossword.el (crossword--advice-around-self-insert-command):
+	Changed from being a :before advice.
+	(crossword--called-interactively-p): New variable to record state.
+	(crossword--advice-around-call-interactively): Use it.
+	(crossword-mode, crossword-quit): Use new advice functions.
+
+2021-01-25  Boruch Baum  <boruch_baum@gmx.com>
+
 	* crossword.el (crossword--insert-grid, crossword--insert-clues)
 	(crossword--start-game-puz): Decode strings to `prefer-utf-8-dos.
 
