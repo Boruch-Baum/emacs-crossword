@@ -1,5 +1,14 @@
 2021-01-25  Boruch Baum  <boruch_baum@gmx.com>
 
+	* crossword.el (crossword--calendar-read-date): Make consistent
+	with function encode-time, remove arg 'noday'.
+	(crossword-download): Use encode-time and format-time-string
+	instead of replace-regexp.
+	(crossword-download-puz-alist, crossword-download-xml-alist):
+	Update entries for use with format-time-string.
+
+2021-01-25  Boruch Baum  <boruch_baum@gmx.com>
+
 	* crossword.el (crossword--advice-around-self-insert-command):
 	Changed from being a :before advice.
 	(crossword--called-interactively-p): New variable to record state.
