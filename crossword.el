@@ -2706,8 +2706,7 @@ arg DATE is expected to be a list of integers '(mm dd yyy)."
        (setq date (crossword--calendar-read-date))
      (end-of-file (read-key "You must enter day of month.
 Press any key to continue."))))
-   (setq url (format-time-string (cadr entry)
-                                 (encode-time 0 0 0 (pop date) (pop date) (pop date))))
+   (setq url (format-time-string (cadr entry) (apply 'encode-time 0 0 0 date)))
    (crossword--download url save-dir from)))
 
 
@@ -2747,13 +2746,20 @@ completion details of played puzzles."
                 (cons "Download a crossword puzzle" #'crossword-download)
                 (cons "Directly load a crossword from a local file" #'crossword-load))))
     (funcall (cdr (assoc-string
-                    (completing-read     "Welcome to Emacs crossword! "
+                    (completing-read "Welcome to Emacs crossword! "
                       (mapcar (lambda (x) (car x)) choices) nil t (caar choices))
                   choices)))))
 
 
 ;;
 ;;; TODO'S:
+
+;; FIXME: In emacs28-snapshot -nw only: Error during redisplay:
+;;        (crossword--window-resize-function #<frame Crossword 0x563c3e801e58>)
+;;        signaled (wrong-type-argument stringp nil)
+;;        NOTE: This doesn't seem to affect the operation of window
+;;        resizing or the crossword autofill, and it isn't being caught
+;;        by toggle-debug-on-error
 
 ;; TODO: Support common GUI events
 ;;       * frame-kill should crossword-quit: only if crossword-frame;

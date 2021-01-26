@@ -1,3 +1,8 @@
+2021-01-26  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.el (crossword-download): Apply encode-time in order to
+	use arg-list as-is.
+
 2021-01-25  Boruch Baum  <boruch_baum@gmx.com>
 
 	(crossword--advice-around-self-insert-command)
