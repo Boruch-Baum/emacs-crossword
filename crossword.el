@@ -2416,7 +2416,7 @@ Similar to `crossword-check-letter', See there for details."
   (interactive)
   (let ((orig-pos (point))
         (pos crossword--first-square)
-        (end crossword--last-square))
+        (end (1+ crossword--last-square)))
     (while (< pos end)
       (goto-char pos)
       (when (get-text-property pos 'answer)
