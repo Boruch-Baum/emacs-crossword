@@ -954,8 +954,7 @@ the frame's three windows, auto-fills the contents of the two
 clue listing buffers, and updates the clue data-structures."
 (when (and (equal "Crossword"
                   (cdr (assq 'name (frame-parameters frame))))
-           (or (< emacs-major-version 27)
-               (not (minibuffer-window-active-p (active-minibuffer-window)))))
+           (not (minibuffer-window-active-p (active-minibuffer-window))))
   (balance-windows)
   ;; snippet based upon part of function `crossword--start-game-puz'
   (let (grid-buffer
