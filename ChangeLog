@@ -1,3 +1,9 @@
+2021-01-28  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.el (crossword-puzzle-file-coding): New option.
+	(crossword--start-game-puz, crossword--summary-data-puz): Use it.
+	Addresses github issue #12, credit github user 'piyo'.
+
 2021-01-26  Boruch Baum  <boruch_baum@gmx.com>
 
 	* crossword.el (crossword-check-puzzle): Ensure last character

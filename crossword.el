@@ -412,8 +412,13 @@ could be several fields distant."
   "Download resources for .xml file.
 NOTE: Support for this file format has not yet been written!"
   :type '(repeat (cons (string :tag "Resource description")
-                       (string :tag "URL")))
-  :type 'boolean)
+                       (string :tag "URL"))))
+
+
+(defcustom crossword-puzzle-file-coding 'iso-8859-1
+  "Coding system for reading puz files.
+Only change this if you are having problems reading a puz file."
+  :type 'coding-system)
 
 
 
@@ -1462,7 +1467,8 @@ If no game is in progress, returns to caller, otherwise signals a
 (defun crossword--start-game-puz (puz-file grid-window)
   "Parse PUZ-FILE for '.puz' format file and begins play.
 GRID-WINDOW is the dedicated crossword-grid window."
-  (let ((across-buffer crossword--across-buffer)
+  (let ((coding-system-for-read crossword-puzzle-file-coding)
+        (across-buffer crossword--across-buffer)
         (down-buffer   crossword--down-buffer)
         grid-width grid-height grid-size
         colophon clean-grid answer-grid
@@ -1627,7 +1633,8 @@ STRING])."
 (defun crossword--summary-data-puz (file)
   "Get summary data for .puz FILE.
 See function `crossword-summary-rebuild-data' for details."
-  (let (grid-width grid-height)
+  (let ((coding-system-for-read crossword-puzzle-file-coding)
+        grid-width grid-height)
     (with-temp-buffer
       ;; Reference similar code in function `crossword--start-game'
       (insert-file-contents file)
