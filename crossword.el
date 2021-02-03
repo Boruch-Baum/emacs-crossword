@@ -2145,11 +2145,13 @@ Use a prefix argument for navigating more than position."
 
 (defun crossword-del-char (&optional arg)
   "Delete the contents at POINT, and navigate forward.
-Optionally, repeat ARG times."
+If the square at POINT has been checked to be 'solved', it is not
+altered. Optionally, repeat ARG times."
   (interactive "p")
   (dotimes (_n arg)
-    (setq last-input-event 32)
-    (crossword--insert-char)
+    (unless (get-text-property (point) 'solved)
+      (setq last-input-event 32)
+      (crossword--insert-char))
     (if (not crossword-auto-nav-only-within-clue)
       (crossword--next-logical-square)
      (let* ((pos (point))
@@ -2162,11 +2164,13 @@ Optionally, repeat ARG times."
 
 (defun crossword-bsp-char (&optional arg)
   "Delete the contents at POINT, and navigate backward.
-Optionally, repeat ARG times."
+If the square at POINT has been checked to be 'solved', it is not
+altered. Optionally, repeat ARG times."
   (interactive "p")
   (dotimes (_n arg)
-    (setq last-input-event 32)
-    (crossword--insert-char)
+    (unless (get-text-property (point) 'solved)
+      (setq last-input-event 32)
+      (crossword--insert-char))
     (if crossword-auto-nav-only-within-clue
       (crossword--prev-square-in-clue)
      (crossword--prev-logical-square))))
@@ -2799,9 +2803,8 @@ completion details of played puzzles."
 ;; TODO: Faces: It may be a bug how 'checked' is (not)used in favor of
 ;;       'solved'
 
-;; TODO: Fix annoying flickering of display when navigating.
-;;       NOTE: Problem does not exist in emacs28snaphot. Condition is
-;;       emacs27 is unknown.
+;; TODO: Fix annoying flickering of display when navigating in emacs26.
+;;       NOTE: Problem does not exist in emacs27 or emacs28snaphot.
 
 ;; TODO: Unicode decoding: The puzzles so far seem to all be what
 ;;       emacs calls either `prefer-utf-8-dos' for the purpose of

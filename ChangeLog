@@ -1,3 +1,8 @@
+2021-02-03  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.el (crossword-del-char, crossword-bsp-char): Don't
+	erase a solved character.
+
 2021-01-28  Boruch Baum  <boruch_baum@gmx.com>
 
 	* crossword.el (crossword-puzzle-file-coding): New option.
