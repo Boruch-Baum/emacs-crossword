@@ -1,5 +1,10 @@
 2021-02-03  Boruch Baum  <boruch_baum@gmx.com>
 
+	* crossword.el (crossword-check-letter): Fontify to emphasize when
+	a puzzle has been completed, ie. solved.
+
+2021-02-03  Boruch Baum  <boruch_baum@gmx.com>
+
 	* crossword.el (crossword-auto-check-completed): New feature.
 	(crossword--update-completion-statistics-display): Use it.
 	(crossword--insert-char): Move statistics update to end, to

@@ -2410,10 +2410,16 @@ will be displayed at the bottom of the crossword grid window."
         (goto-char crossword--solved-percent-pos)
         (when (re-search-forward "...% (.../...)" nil t)
           (replace-match
-            (format "%3d%% (%3d/%3d)"
-              (/ (* 100 crossword--solved-count) crossword--total-count)
-              crossword--solved-count
-              crossword--total-count))))
+            (propertize
+              (format "%3d%% (%3d/%3d)"
+                (/ (* 100 crossword--solved-count) crossword--total-count)
+                crossword--solved-count
+                crossword--total-count)
+              'face
+              (if (/= crossword--solved-count crossword--total-count)
+                'default
+               (add-face-text-property (point-at-bol) (point-at-eol) 'bold)
+               'crossword-solved-face)))))
      (t
       (add-face-text-property beg end 'crossword-error-face)
       (cl-incf crossword--error-count)
