@@ -254,6 +254,10 @@
 ;;
 ;; [1] http://www.litsoft.com/
 ;; [2] http://fileformats.archiveteam.org/wiki/PUZ_%28crossword_puzzles%29
+;; [3] https://code.google.com/archive/p/puz/wikis/FileFormat.wiki
+;;     The contents at this URL were mangled, so I reformatted it to
+;;     properly display its tables and code blocks in an `org-mode`
+;;     file. See `docs/crossword_puz_format.org`.
 
 
 

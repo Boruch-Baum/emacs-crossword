@@ -210,11 +210,16 @@
    by Literate Software LLC[1] and used initially by them for their
    'across' line of software for creating, solving and sharing crossword
    puzzles. This format has supposedly since become the de facto
-   standard for the genre[2].
+   standard for the genre[2][3].
 
    [1] http://www.litsoft.com/
 
    [2] http://fileformats.archiveteam.org/wiki/PUZ_%28crossword_puzzles%29
+
+   [3] https://code.google.com/archive/p/puz/wikis/FileFormat.wiki
+       The contents at this URL were mangled, so I reformatted it to
+       properly display its tables and code blocks in an `org-mode`
+       file. See `docs/crossword_puz_format.org`.
 
 
 ## Download resources:
