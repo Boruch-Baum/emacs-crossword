@@ -1024,14 +1024,6 @@ sets variable `last-input-event' to nil after using its value."
           (face-at-point (get-text-property (point) 'face))
           (goto-pos (point)))
       (setq last-input-event nil)
-      ;; ** Update puzzle completion sattistics
-      (cond
-       ((string-match "[[:upper:]]" char-to-insert)
-        (unless (string-match "[[:upper:]]" char-current)
-          (cl-incf crossword--completed-count)))
-       (t ; ie. (not (string-match "[[:upper:]]" char-to-insert))
-        (when (string-match "[[:upper:]]" char-current)
-          (cl-decf crossword--completed-count))))
       ;; ** Insert a character into grid
       (forward-char)
       (insert-and-inherit char-to-insert)
@@ -1046,6 +1038,14 @@ sets variable `last-input-event' to nil after using its value."
       (when (listp face-at-point)
         (put-text-property (point) (1+ (point)) 'face
           (setq face-at-point (delq nil face-at-point))))
+      ;; ** Update puzzle completion sattistics
+      (cond
+       ((string-match "[[:upper:]]" char-to-insert)
+        (unless (string-match "[[:upper:]]" char-current)
+          (cl-incf crossword--completed-count)))
+       (t ; ie. (not (string-match "[[:upper:]]" char-to-insert))
+        (when (string-match "[[:upper:]]" char-current)
+          (cl-decf crossword--completed-count))))
       (crossword--update-completion-statistics-display)
       (goto-char goto-pos))
     (setq buffer-read-only t))
