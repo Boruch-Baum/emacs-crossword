@@ -1626,13 +1626,41 @@ STRING])."
       (push (list (cl-incf id) (seq--into-vector elem)) result))))
 
 
+(defun crossword--date-matcher (str)
+  "Return non-nil if STR matches a particular date regex.
+This is NOT a general purpose function. It only responds to a
+particular observed issue.
+The return value is the `match-end' of the regex."
+;; Regex to remove date string from Washington Post copyright string:
+;; Example: "January 31, 2021, ". Ref: variable `parse-time-months'
+  (let ((months (list "January" "February" "March" "April" "May" "June" "July"
+                      "August" "September" "October" "November" "December"))
+        month found)
+    (and
+      (progn
+        (while (and (not found)
+                    (setq month (pop months)))
+          (when (string-match month str)
+            (setq found (match-end 0))))
+        found)
+      (string-match " [[:digit:]]\\{2\\}, [[:digit:]]\\{4\\}, " str found)
+      (match-end 0))))
+
+
+(defun crossword--minimize-copyright-string (str)
+  "Returns a possibly-shortened STR."
+  (setq str
+    (replace-regexp-in-string
+      "^\\( +\\)?\xa9?©?\\( +\\)?\\([[:digit:]]+,? +\\)?" "" str))
+  (substring str (crossword--date-matcher str)))
+
+
 (defun crossword--summary-colophon-list (colophon)
   "Format elements of raw COLOPHON list."
   (list
     (replace-regexp-in-string "^\\( +\\)?" "" (nth 0 colophon))
     (replace-regexp-in-string "^\\( +\\)?\\([Bb]y +\\)?" "" (nth 1 colophon))
-    (replace-regexp-in-string
-      "^\\( +\\)?\xa9?©?\\( +\\)?\\([[:digit:]]+,? +\\)?" "" (nth 2 colophon))))
+    (crossword--minimize-copyright-string (nth 2 colophon))))
 
 (defun crossword--summary-data-puz (file)
   "Get summary data for .puz FILE.
@@ -2816,6 +2844,9 @@ completion details of played puzzles."
 ;;       2021-01-25 has been sufficient, as tested by the the
 ;;       available puz data (all files for the copyright symbol,
 ;;       jz180531 for ñ.
+
+;; TODO: Support puzzles with 'circled' squares.
+;;       Example: wsj210201.puz
 
 ;; TODO: Support "scrambled" .puz files.
 ;;       The format includes an option for basic encryption of the
