@@ -1,5 +1,18 @@
 2021-02-03  Boruch Baum  <boruch_baum@gmx.com>
 
+	* crossword.el (crossword-auto-check-completed): New feature.
+	(crossword--update-completion-statistics-display): Use it.
+	(crossword--insert-char): Move statistics update to end, to
+	support feature.
+
+2021-02-03  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.elo (crossword--date-matcher)
+	(crossword--minimize-copyright-string): New functions.
+	(crossword--summary-colophon-list): Use them.
+
+2021-02-03  Boruch Baum  <boruch_baum@gmx.com>
+
 	* crossword.el (crossword-del-char, crossword-bsp-char): Don't
 	erase a solved character.
 

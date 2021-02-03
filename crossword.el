@@ -330,6 +330,12 @@
 Set this NIL to totally exit 'crossword' immediately."
   :type  'boolean)
 
+(defcustom crossword-auto-check-completed t
+  "Whether to automatically check a puzzle when completely filled.
+Set this NIL to be able to self-check first and avoid registering
+any errors."
+  :type  'boolean)
+
 (defcustom crossword-empty-position-char "▦"
   "Character denoting non-insertion squares.
 The single character to use to denote a positon on the board
@@ -860,7 +866,13 @@ THIS-CLUE-ACROSS and THIS-CLUE-DOWN are integers values."
       (format "%3d%% (%3d/%3d)"
         (/ (* 100 crossword--completed-count) crossword--total-count)
         crossword--completed-count
-        crossword--total-count))))
+        crossword--total-count)))
+  (when (and crossword-auto-check-completed
+             (= crossword--completed-count crossword--total-count))
+    (let ((pos (point)))
+      (backward-char)
+      (crossword-check-puzzle)
+      (goto-char pos))))
 
 
 (defun crossword--summary-revert-hook-function ()
@@ -1020,9 +1032,6 @@ sets variable `last-input-event' to nil after using its value."
        (t ; ie. (not (string-match "[[:upper:]]" char-to-insert))
         (when (string-match "[[:upper:]]" char-current)
           (cl-decf crossword--completed-count))))
-      (crossword--update-completion-statistics-display)
-      (goto-char goto-pos)
-      (setq goto-pos nil)
       ;; ** Insert a character into grid
       (forward-char)
       (insert-and-inherit char-to-insert)
@@ -1036,7 +1045,9 @@ sets variable `last-input-event' to nil after using its value."
        (setq face-at-point (get-text-property (point) 'face)))
       (when (listp face-at-point)
         (put-text-property (point) (1+ (point)) 'face
-          (setq face-at-point (delq nil face-at-point)))))
+          (setq face-at-point (delq nil face-at-point))))
+      (crossword--update-completion-statistics-display)
+      (goto-char goto-pos))
     (setq buffer-read-only t))
 
 
