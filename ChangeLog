@@ -1,5 +1,10 @@
 2021-02-04  Boruch Baum  <boruch_baum@gmx.com>
 
+	* crossword.el 	(crossword--insert-grid, crossword-check-letter):
+	Improve alignment and consistency of integers displayed.
+
+2021-02-04  Boruch Baum  <boruch_baum@gmx.com>
+
 	* crossword.el (crossword-first-square, crossword-last-square):
 	New navigation functions.
 	(crossword-mode-map): Bind them.

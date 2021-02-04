@@ -1334,9 +1334,9 @@ are substrings of the puzzle file."
                do (setq start (match-end 0))
                finally return count))
     (insert
-      (format " Filled:   0%% (  0/%3d) Timer: [off] 00:00\n" crossword--total-count)
-      (format " Solved:   0%% (  0/%3d)\n" crossword--total-count)
-              " Checked: 000  Errors: 000\n\n")
+      (format " Filled:    0%% (  0/%3d) Timer: [off] 00:00\n" crossword--total-count)
+      (format " Solved:    0%% (  0/%3d)\n" crossword--total-count)
+              " Checked:   0  Errors:   0\n\n")
     (setq crossword--completion-percent-pos (+  9 start-pos)
           crossword--timer-state-pos        (+ 32 start-pos)
           crossword--timer-value-pos        (+ 37 start-pos)
@@ -2414,7 +2414,7 @@ will be displayed at the bottom of the crossword grid window."
      (goto-char crossword--checked-count-pos)
      (re-search-forward "..." nil t)
      (replace-match
-       (propertize (format "%03d" crossword--checked-count)
+       (propertize (format "%3d" crossword--checked-count)
          'face 'crossword-solved-face))
      (cond
       ((string= letter (get-text-property beg 'answer))
@@ -2440,7 +2440,7 @@ will be displayed at the bottom of the crossword grid window."
       (goto-char crossword--error-count-pos)
       (re-search-forward "..." nil t)
       (replace-match
-        (propertize (format "%03d" crossword--error-count)
+        (propertize (format "%3d" crossword--error-count)
           'face 'crossword-error-inverse-face))
       (goto-char beg)
       (put-text-property beg end 'errors
@@ -2593,17 +2593,14 @@ state. Internally, each entry is a list of ten strings:
    9: num errors
   10: timer elapsed time."
   (let ((orig-buf (current-buffer))
-        tmp-buf ; necessary?
         result)
-    (dolist (file (crossword--puzzle-file-list) result)
+    (dolist (file (crossword--puzzle-file-list))
       (push (if (string-match "\\.puz$" file)
               (crossword--summary-data-puz file)
              (crossword--summary-data-puz-emacs file))
             result))
     (with-temp-file (crossword--summary-file)
       (prin1 result (current-buffer)))
-    (when (setq tmp-buf (get-buffer "Crossword temporary"))
-      (kill-buffer tmp-buf)) ; necessary?
     (set-buffer orig-buf)))
 
 
@@ -2726,8 +2723,8 @@ Prompt to save current state, then kill buffers, windows, and frame."
 (defun crossword-summary ()
   "Display detailed meta-data of known puzzle files.
 This includes progress for partially played puzzles. Data can be
-sorted by any column, and puzzles can be played by pressing <RET>
-on their entry."
+sorted by any column, and individual entries can be deleted.
+Puzzles can be played by pressing <RET> on their entry."
   (interactive)
   (unless (crossword--check-and-create-save-path)
     (crossword-quit))
