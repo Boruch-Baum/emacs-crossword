@@ -604,6 +604,8 @@ either 'across or 'down.")
     (define-key map "\t"                  'crossword-next-field)
     (define-key map (kbd "<backtab>")     'crossword-prior-field)
     (define-key map (kbd "/")             'crossword-goto-clue)
+    (define-key map (kbd "M-<")           'crossword-first-square)
+    (define-key map (kbd "M->")           'crossword-last-square)
     (define-key map (kbd "M-c l")         'crossword-check-letter)
     (define-key map (kbd "M-c w")         'crossword-check-word)
     (define-key map (kbd "M-c p")         'crossword-check-puzzle)
@@ -2230,6 +2232,18 @@ Supply the CLUE number as a prefix-ARG or be prompted."
      ((setq elem  (assq clue crossword--down-clue-list))
        (goto-char (car (nth 2 elem))))
      (t (user-error "Invalid entry: %d" clue)))))
+
+
+(defun crossword-first-square ()
+  "Navigate to the first square of the puzzle."
+  (interactive)
+  (goto-char crossword--first-square))
+
+
+(defun crossword-last-square ()
+  "Navigate to the first square of the puzzle."
+  (interactive)
+  (goto-char crossword--last-square))
 
 
 (defun crossword-clue-scroll-up (&optional lines)

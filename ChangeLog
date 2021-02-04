@@ -1,3 +1,9 @@
+2021-02-04  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.el (crossword-first-square, crossword-last-square):
+	New navigation functions.
+	(crossword-mode-map): Bind them.
+
 2021-02-03  Boruch Baum  <boruch_baum@gmx.com>
 
 	* crossword.el (crossword-check-letter): Fontify to emphasize when
