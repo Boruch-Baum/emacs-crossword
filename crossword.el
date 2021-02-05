@@ -521,7 +521,7 @@ character.")
 (defvar-local crossword--timer-value-pos 0)
 (defvar-local crossword--checked-count-pos 0)
 (defvar-local crossword--error-count-pos 0)
-(defvar-local crossword--completed-count 0)
+(defvar-local crossword--cheat-count-pos 0)
 (defvar-local crossword--solved-percent-pos 0)
 (defvar-local crossword--completion-percent-pos 0)
 (defvar-local crossword--grid-end 0)
@@ -534,12 +534,16 @@ character.")
 ;; Tallies for progress statistics feedback
 (defvar-local crossword--total-count 0
   "Total number of puzzles squares to be solved.")
+(defvar-local crossword--completed-count 0
+  "Number of squares filled.")
 (defvar-local crossword--solved-count 0
   "Number of puzzle squares verified as correctly solved.")
 (defvar-local crossword--error-count 0
   "Number of unique letters checked and found incorrect.")
 (defvar-local crossword--checked-count 0
   "Number of unique letters checked.")
+(defvar-local crossword--cheat-count 0
+  "Number of unique letters asked for as hints.")
 
 ;; Timer-related
 (defvar-local crossword--timer-elapsed 0)
@@ -665,6 +669,7 @@ either 'across or 'down.")
          ("%%solved" 7 t :right-align t)
          ("checked" 7 t :right-align t)
          ("errors" 7 t :right-align t)
+         ("cheats" 7 t :right-align t)
          ("time" 5 t)])
   (setq tabulated-list-sort-key (cons "date" 'flip))
   (setq tabulated-list-padding 2)
@@ -860,23 +865,6 @@ THIS-CLUE-ACROSS and THIS-CLUE-DOWN are integers values."
     (goto-char return-pos)))
 
 
-(defun crossword--update-completion-statistics-display ()
-  "Update the line above the crossword grid."
-  (goto-char crossword--completion-percent-pos)
-  (when (re-search-forward "...% (.../...)" nil t)
-    (replace-match
-      (format "%3d%% (%3d/%3d)"
-        (/ (* 100 crossword--completed-count) crossword--total-count)
-        crossword--completed-count
-        crossword--total-count)))
-  (when (and crossword-auto-check-completed
-             (= crossword--completed-count crossword--total-count))
-    (let ((pos (point)))
-      (backward-char)
-      (crossword-check-puzzle)
-      (goto-char pos))))
-
-
 (defun crossword--summary-revert-hook-function ()
   "Hook function for `tabulated-list-revert-hook'.
 See mode `crossword-summary-mode'."
@@ -1044,11 +1032,16 @@ sets variable `last-input-event' to nil after using its value."
       (cond
        ((string-match "[[:upper:]]" char-to-insert)
         (unless (string-match "[[:upper:]]" char-current)
-          (cl-incf crossword--completed-count)))
+          (crossword--incf-completion-count 1)
+          (when (and crossword-auto-check-completed
+                     (= crossword--completed-count crossword--total-count))
+            (let ((pos (point)))
+              (backward-char)
+              (crossword-check-puzzle)
+              (goto-char pos)))))
        (t ; ie. (not (string-match "[[:upper:]]" char-to-insert))
         (when (string-match "[[:upper:]]" char-current)
-          (cl-decf crossword--completed-count))))
-      (crossword--update-completion-statistics-display)
+          (crossword--incf-completion-count -1))))
       (goto-char goto-pos))
     (setq buffer-read-only t))
 
@@ -1101,6 +1094,7 @@ If POS is NIL, acts on POINT. In this context, 'empty' means not
              crossword--completed-count
              crossword--solved-percent-pos
              crossword--completion-percent-pos
+             crossword--cheat-count-pos
              crossword--first-column
              crossword--last-column
              crossword--grid-end
@@ -1109,6 +1103,7 @@ If POS is NIL, acts on POINT. In this context, 'empty' means not
              crossword--solved-count
              crossword--error-count
              crossword--checked-count
+             crossword--cheat-count
              crossword--timer-elapsed
              crossword--timer-object
              crossword--across-clue-list
@@ -1336,13 +1331,14 @@ are substrings of the puzzle file."
     (insert
       (format " Filled:    0%% (  0/%3d) Timer: [off] 00:00\n" crossword--total-count)
       (format " Solved:    0%% (  0/%3d)\n" crossword--total-count)
-              " Checked:   0  Errors:   0\n\n")
-    (setq crossword--completion-percent-pos (+  9 start-pos)
-          crossword--timer-state-pos        (+ 32 start-pos)
-          crossword--timer-value-pos        (+ 37 start-pos)
-          crossword--solved-percent-pos     (+ 52 start-pos)
-          crossword--checked-count-pos      (+ 77 start-pos)
-          crossword--error-count-pos        (+ 90 start-pos))
+              " Checked:   0  Errors:   0  Cheats:   0\n\n")
+    (setq crossword--completion-percent-pos (+   9 start-pos)
+          crossword--timer-state-pos        (+  32 start-pos)
+          crossword--timer-value-pos        (+  37 start-pos)
+          crossword--solved-percent-pos     (+  52 start-pos)
+          crossword--checked-count-pos      (+  79 start-pos)
+          crossword--error-count-pos        (+  92 start-pos)
+          crossword--cheat-count-pos        (+ 105 start-pos))
     (insert divider block-line)
     (insert crossword-new-line)
     (setq start-pos (point)
@@ -1536,7 +1532,7 @@ GRID-WINDOW is the dedicated crossword-grid window."
                               "--- Down clues for crossword"))
    ;; ** Finish in grid buffer
    (select-window grid-window 'norecord)
-   (crossword--update-completion-statistics-display)
+   (crossword--incf-completion-count 0)
    (setq crossword--across-clue-list across-clue-list
          crossword--down-clue-list   down-clue-list
          crossword--last-square      (1- (nth 3 (car (last crossword--across-clue-list))))
@@ -1660,6 +1656,106 @@ The return value is the `match-end' of the regex."
       (match-end 0))))
 
 
+(defun crossword--incf-completion-count (arg)
+  "Incrememnt the puzzle 'completion' count by ARG."
+  (let ((pos (point)))
+    (cl-incf crossword--completed-count arg)
+    (goto-char crossword--completion-percent-pos)
+    (when (re-search-forward "...% (.../...)" nil t)
+      (replace-match
+        (format "%3d%% (%3d/%3d)"
+          (/ (* 100 crossword--completed-count) crossword--total-count)
+          crossword--completed-count
+          crossword--total-count)))
+    (goto-char pos)))
+
+
+(defun crossword--incf-error-count ()
+  "Incrememnt the puzzle 'error' count."
+  (let ((pos (point)))
+    (cl-incf crossword--error-count)
+    (goto-char crossword--error-count-pos)
+    (re-search-forward "..." nil t)
+    (replace-match
+      (propertize (format "%3d" crossword--error-count)
+        'face 'crossword-error-inverse-face))
+    (goto-char pos)))
+
+
+(defun crossword--incf-solved-count ()
+  "Incrememnt the puzzle 'solved' count."
+  (let ((pos (point)))
+    (cl-incf crossword--solved-count)
+    (goto-char crossword--solved-percent-pos)
+    (when (re-search-forward "...% (.../...)" nil t)
+      (replace-match
+        (propertize
+          (format "%3d%% (%3d/%3d)"
+            (/ (* 100 crossword--solved-count) crossword--total-count)
+            crossword--solved-count
+            crossword--total-count)
+          'face
+          (if (/= crossword--solved-count crossword--total-count)
+            'default
+           (add-face-text-property (point-at-bol) (point-at-eol) 'bold)
+           'crossword-solved-face))))
+    (goto-char pos)))
+
+
+(defun crossword--incf-checked-count ()
+  "Incrememnt the puzzle 'checked' count."
+  (let ((pos (point)))
+    (cl-incf crossword--checked-count)
+    (goto-char crossword--checked-count-pos)
+    (re-search-forward "..." nil t)
+    (replace-match
+      (propertize (format "%3d" crossword--checked-count)
+        'face 'crossword-solved-face))
+    (goto-char pos)))
+
+
+(defun crossword--incf-cheat-count ()
+  "Incrememnt the puzzle 'cheat' count."
+  (let ((pos (point)))
+    (cl-incf crossword--cheat-count)
+    (goto-char crossword--cheat-count-pos)
+    (when (re-search-forward "..." nil t)
+      (replace-match
+        (propertize
+          (format "%3d" crossword--cheat-count)
+          'face 'crossword-error-inverse-face)))
+    (goto-char pos)))
+
+
+(defun crossword--cheat-count--get-corrected-positions ()
+  "Return correct current position, with 'cheat count' feature.
+For puz-emacs files was created before the 'cheat'count feature
+was introduced, we need to modify the buffer, and so must also
+change the positions of many elements and position variables."
+  (if (not (zerop crossword--cheat-count-pos))
+    (point)
+   (let ((inhibit-read-only t)
+         (pos (+ (point) 13)))
+     (goto-char crossword--error-count-pos)
+     (end-of-line)
+     (setq crossword--cheat-count-pos (+ crossword--error-count-pos 13))
+     (insert "  Cheats:   0")
+     (cl-incf crossword--first-square 13)
+     (cl-incf crossword--last-square 13)
+     (cl-incf crossword--grid-end 13)
+     (dolist (clue crossword--across-clue-list)
+       (cl-incf (nth 2 clue) 13)
+       (cl-incf (nth 3 clue) 13))
+     (setq crossword--down-clue-list
+       (mapcar (lambda (clue) (let (squares)
+                                (dolist (square (nth 2 clue))
+                                  (push (cl-incf square 13) squares))
+                                (setf (nth 2 clue) (nreverse squares)))
+                                clue)
+               crossword--down-clue-list))
+     (goto-char pos))))
+
+
 (defun crossword--minimize-copyright-string (str)
   "Returns a possibly-shortened STR."
   (setq str
@@ -1705,7 +1801,7 @@ See function `crossword-summary-rebuild-data' for details."
            (crossword--summary-colophon-list
              (butlast (split-string (buffer-substring 1 (point))
                                     "\n" nil)))
-           (list "0" "0" "0" "0" "00:00")))))))
+           (list "0" "0" "0" "0" "0" "00:00")))))))
 
 
 (defun crossword--summary-add-current ()
@@ -1726,6 +1822,10 @@ See function `crossword-summary-rebuild-data' for details."
              (getval crossword--solved-percent-pos 3)
              (getval crossword--checked-count-pos 3)
              (getval crossword--error-count-pos 3)
+             (if (zerop crossword--cheat-count-pos)
+               ;; File pre-dates introduction of this feature
+               "???"
+              (getval crossword--cheat-count-pos 3))
              (getval crossword--timer-value-pos 5)))))
 
 
@@ -2410,45 +2510,21 @@ will be displayed at the bottom of the crossword grid window."
    (when (and (string-match "[[:upper:]]" letter)
               (not (get-text-property beg 'solved))
               (not (member letter errors-list)))
-     (cl-incf crossword--checked-count)
-     (goto-char crossword--checked-count-pos)
-     (re-search-forward "..." nil t)
-     (replace-match
-       (propertize (format "%3d" crossword--checked-count)
-         'face 'crossword-solved-face))
+     (crossword--incf-checked-count)
      (cond
       ((string= letter (get-text-property beg 'answer))
         (add-face-text-property beg end 'crossword-solved-face)
         (put-text-property beg end 'solved t)
-        (cl-incf crossword--solved-count)
-        (goto-char crossword--solved-percent-pos)
-        (when (re-search-forward "...% (.../...)" nil t)
-          (replace-match
-            (propertize
-              (format "%3d%% (%3d/%3d)"
-                (/ (* 100 crossword--solved-count) crossword--total-count)
-                crossword--solved-count
-                crossword--total-count)
-              'face
-              (if (/= crossword--solved-count crossword--total-count)
-                'default
-               (add-face-text-property (point-at-bol) (point-at-eol) 'bold)
-               'crossword-solved-face)))))
-     (t
-      (add-face-text-property beg end 'crossword-error-face)
-      (cl-incf crossword--error-count)
-      (goto-char crossword--error-count-pos)
-      (re-search-forward "..." nil t)
-      (replace-match
-        (propertize (format "%3d" crossword--error-count)
-          'face 'crossword-error-inverse-face))
-      (goto-char beg)
-      (put-text-property beg end 'errors
-        (sort (nconc (list letter) errors-list) 'string<)))))
+        (crossword--incf-solved-count))
+      (t
+       (add-face-text-property beg end 'crossword-error-face)
+       (put-text-property beg end 'errors
+         (sort (nconc (list letter) errors-list) 'string<))
+       (crossword--incf-error-count))))
    ;; Maybe this next should be withinthe 'when' level?
    (crossword--update-grid-clues (get-text-property beg 'clue-across)
                                  (get-text-property beg 'clue-down))
-   (goto-char beg)))
+   (goto-char beg))) ;; FIXME: This is probably no longer necessary.
 
 
 
@@ -2508,12 +2584,25 @@ Similar to `crossword-check-letter', See there for details."
 It will highlighted per `crossword-solved-face'."
   (interactive)
   (let* ((inhibit-read-only t)
-         (pos (point))
-         (answer (get-text-property pos 'answer)))
-    (when answer
+         (beg (crossword--cheat-count--get-corrected-positions))
+         (end (1+ beg))
+         (answer (get-text-property beg 'answer))
+         letter errors-list)
+    (when (and answer
+               (not (get-text-property beg 'solved)))
+      (unless (string= answer
+                       (setq letter (buffer-substring-no-properties beg end)))
+        (crossword--incf-cheat-count)
+        (when (not (member letter (setq errors-list (get-text-property beg 'errors))))
+          (crossword--incf-error-count)
+          (when (string-match "[[:upper:]]" letter)
+            (put-text-property beg end 'errors
+              (sort (nconc (list letter) errors-list) 'string<)))))
+      (crossword--incf-checked-count)
+      (crossword--incf-solved-count)
       (setq last-input-event (string-to-char answer))
-      (put-text-property pos (1+ pos) 'face 'crossword-solved-face)
-      (put-text-property pos (1+ pos) 'solved t)
+      (put-text-property beg end 'face 'crossword-solved-face)
+      (put-text-property beg end 'solved t)
       (crossword--insert-char))))
 
 
@@ -2523,7 +2612,7 @@ Similar to `crossword-solve-letter', See there for details."
   (interactive)
   (cond
    ((eq crossword--nav-dir 'across)
-     (let* ((orig-pos (point))
+     (let* ((orig-pos (crossword--cheat-count--get-corrected-positions))
             (clue-num (get-text-property (point) 'clue-across))
             (clue (assq clue-num crossword--across-clue-list))
             (pos (nth 2 clue))
@@ -2551,14 +2640,15 @@ Similar to `crossword-solve-letter', See there for details."
   (interactive)
   (when crossword--timer-object
     (crossword-pause-unpause-timer))
-  (let ((pos crossword--first-square)
+  (let ((orig-pos (crossword--cheat-count--get-corrected-positions))
+        (pos crossword--first-square)
         (end (+ 2 crossword--last-square)))
     (goto-char pos)
     (while (re-search-forward crossword--grid-characters end t)
       (backward-char)
       (crossword-solve-letter)
-      (forward-char)))
-  (backward-char))
+      (forward-char))
+    (goto-char orig-pos)))
 
 
 (defun crossword-summary-sort (&optional column)

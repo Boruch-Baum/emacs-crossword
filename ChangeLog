@@ -1,3 +1,28 @@
+2021-02-07  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.el (crossword--cheat-count)
+	(crossword--cheat-count-pos): Variables for new feature.
+	(crossword-summary-mode, crossword--summary-data-puz): Add column
+	for it in tabulated list.
+	(crossword--local-vars-list): Include the variables in the list of
+	those to be saved.
+	(crossword--insert-grid): Add display position for new feature.
+	(crossword--incf-completion-count, crossword--incf-error-count)
+	(crossword--incf-solved-count, crossword--incf-checked-count)
+	(crossword--incf-cheat-count): New helper functions.
+	(crossword--insert-char): Use helper function for completion
+	count, and take code to check puzzle on complete from function
+	crossword--update-completion-statistics-display.
+	(crossword--start-game-puz): Use helper function for completin
+	count.
+	(crossword--update-completion-statistics-display): delete as
+	superfluous.
+	(crossword--cheat-count--get-corrected-positions): Support
+	backward-compatibility.
+	(crossword--summary-add-current, crossword-solve-letter)
+	(crossword-solve-puzzle, crossword-solve-word)
+	(crossword-check-letter): Implement feature.
+
 2021-02-04  Boruch Baum  <boruch_baum@gmx.com>
 
 	* crossword.el 	(crossword--insert-grid, crossword-check-letter):
