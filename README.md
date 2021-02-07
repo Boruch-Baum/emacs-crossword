@@ -262,3 +262,41 @@
 * Author/Maintainer:  Boruch Baum <boruch-baum@gmx.com>
 * Homepage: https://github.com/Boruch-Baum/emacs-crossword
 * License: GPL3+
+
+## Some other Emacs software that I've published
+
+* Diredc [![MELPA](https://melpa.org/packages/diredc-badge.svg)](https://melpa.org/#/diredc) [![MELPA Stable](https://stable.melpa.org/packages/diredc-badge.svg)](https://stable.melpa.org/#/diredc)
+  * Large collection of interoperable dired extensions
+  * https://github.com/Boruch-Baum/emacs-diredc
+
+* Emacs-w3m
+  * Extensions to the classic web browser (fork)
+    * Advanced downloader (bulk, regex, queue management, resume aborted)
+    * Scrub history
+    * More ...
+  * https://github.com/Boruch-Baum/emacs-w3m
+
+* Crossword [![MELPA](https://melpa.org/packages/crossword-badge.svg)](https://melpa.org/#/crossword)
+  * Download and play crossword puzzles, in Emacs!
+  * https://github.com/Boruch-Baum/emacs-crossword
+
+* Key-assist
+  [![MELPA](https://melpa.org/packages/key-assist-badge.svg)](https://melpa.org/#/key-assist)
+  [![MELPA Stable](https://stable.melpa.org/packages/key-assist-badge.svg)](https://stable.melpa.org/#/key-assist)
+  * Simple keybinding cheatsheet and launcher
+  * https://github.com/Boruch-Baum/emacs-key-assist
+
+* Home-end
+  [![MELPA](https://melpa.org/packages/home-end-badge.svg)](https://melpa.org/#/home-end)
+  [![MELPA Stable](https://stable.melpa.org/packages/home-end-badge.svg)](https://stable.melpa.org/#/home-end)
+  * Turn home and end keys to multi-use navigation keys
+  * https://github.com/Boruch-Baum/emacs-home-end
+
+* Keypress-multi-event
+  [![MELPA](https://melpa.org/packages/keypress-multi-event-badge.svg)](https://melpa.org/#/keypress-multi-event)
+  [![MELPA Stable](https://stable.melpa.org/packages/keypress-multi-event-badge.svg)](https://stable.melpa.org/#/keypress-multi-event)
+  * perform different actions when repeating a key
+  * https://github.com/Boruch-Baum/emacs-keypress-multi-event
+
+* Post-mode  - Updates to the abandoned email editing package (fork)
+  * https://github.com/Boruch-Baum/post-mode
