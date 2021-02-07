@@ -4,6 +4,7 @@
 	Always tab to next field on completed puzzle.
 	(crossword--update-faces): Respect FORCE arg for down clues.
 	(crossword-solve-puzzle): Force update faces upon completion.
+	(crossword--insert-grid): Update timer positions.
 
 2021-02-07  Boruch Baum  <boruch_baum@gmx.com>
 
