@@ -792,7 +792,8 @@ expects the current buffer to be the crossword grid-buffer."
             (crossword--face-current-add (nth 2 clue) (nth 3 clue)))))
       ;; Grid buffer: down calculations
       (setq prior-clue-num (get-text-property crossword--prior-point 'clue-down))
-      (unless (eq prior-clue-num this-clue-down)
+      (when (or (not (eq prior-clue-num this-clue-down))
+                force)
         (when prior-clue-num
           (setq clue (assq prior-clue-num crossword--down-clue-list))
           (setq pos-list (nth 2 clue))
@@ -2079,7 +2080,8 @@ Optionally, repeat ARG times."
           (when crossword-wrap-on-entry-or-nav
             (setq we-have-wrapped t)
             (goto-char crossword--first-square)))
-         (when crossword-tab-to-next-unfilled
+         (when (and crossword-tab-to-next-unfilled
+                    (/= crossword--completed-count crossword--total-count))
            (while (not done)
              (backward-char)
              (if (crossword--fwd-avail (nth 3 next))
@@ -2116,7 +2118,8 @@ Optionally, repeat ARG times."
             (goto-char (car (nth 2 next)))
            (when crossword-wrap-on-entry-or-nav
              (goto-char (car (nth 2 (car crossword--down-clue-list))))))
-          (when crossword-tab-to-next-unfilled
+          (when (and crossword-tab-to-next-unfilled
+                     (/= crossword--completed-count crossword--total-count))
             (while (not done)
               (if (crossword--is-empty-square)
                 (setq done t)
@@ -2173,7 +2176,8 @@ Optionally, repeat ARG times."
                          (setq we-have-wrapped t)
                          (setq index (1- (length crossword--across-clue-list)))
                          (car (last crossword--across-clue-list)))))))))
-        (when crossword-tab-to-next-unfilled
+        (when (and crossword-tab-to-next-unfilled
+                   (/= crossword--completed-count crossword--total-count))
           ;; This is a bit weird because we are moving to the FIRST
           ;; character of the PRIOR field, then, advancing forward
           ;; toward the end of that field, then moving to the PRIOR
@@ -2215,7 +2219,8 @@ Optionally, repeat ARG times."
                                       (nth (cl-decf index) crossword--down-clue-list)
                                      (setq index (1- (length crossword--down-clue-list)))
                                      (car (last crossword--down-clue-list)))))))
-           (when crossword-tab-to-next-unfilled
+           (when (and crossword-tab-to-next-unfilled
+                      (/= crossword--completed-count crossword--total-count))
              ;; This is a bit weird because we are moving to the FIRST
              ;; character of the PRIOR field, then, advancing forward
              ;; toward the end of that field, then moving to the PRIOR
@@ -2640,7 +2645,8 @@ Similar to `crossword-solve-letter', See there for details."
   (interactive)
   (when crossword--timer-object
     (crossword-pause-unpause-timer))
-  (let ((orig-pos (crossword--cheat-count--get-corrected-positions))
+  (let ((inhibit-read-only t)
+        (orig-pos (crossword--cheat-count--get-corrected-positions))
         (pos crossword--first-square)
         (end (+ 2 crossword--last-square)))
     (goto-char pos)
@@ -2648,7 +2654,8 @@ Similar to `crossword-solve-letter', See there for details."
       (backward-char)
       (crossword-solve-letter)
       (forward-char))
-    (goto-char orig-pos)))
+    (goto-char orig-pos)
+    (crossword--update-faces 'force)))
 
 
 (defun crossword-summary-sort (&optional column)

@@ -1,5 +1,12 @@
 2021-02-07  Boruch Baum  <boruch_baum@gmx.com>
 
+	* crossword.el (crossword-next-field, crossword-prior-field):
+	Always tab to next field on completed puzzle.
+	(crossword--update-faces): Respect FORCE arg for down clues.
+	(crossword-solve-puzzle): Force update faces upon completion.
+
+2021-02-07  Boruch Baum  <boruch_baum@gmx.com>
+
 	* crossword.el (crossword--cheat-count)
 	(crossword--cheat-count-pos): Variables for new feature.
 	(crossword-summary-mode, crossword--summary-data-puz): Add column
