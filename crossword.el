@@ -1333,10 +1333,10 @@ are substrings of the puzzle file."
       (format " Filled:    0%% (  0/%3d) Timer: [off] 00:00\n" crossword--total-count)
       (format " Solved:    0%% (  0/%3d)\n" crossword--total-count)
               " Checked:   0  Errors:   0  Cheats:   0\n\n")
-    (setq crossword--completion-percent-pos (+   9 start-pos)
+    (setq crossword--completion-percent-pos (+  10 start-pos)
           crossword--timer-state-pos        (+  33 start-pos)
           crossword--timer-value-pos        (+  38 start-pos)
-          crossword--solved-percent-pos     (+  52 start-pos)
+          crossword--solved-percent-pos     (+  54 start-pos)
           crossword--checked-count-pos      (+  79 start-pos)
           crossword--error-count-pos        (+  92 start-pos)
           crossword--cheat-count-pos        (+ 105 start-pos))
@@ -2081,7 +2081,7 @@ Optionally, repeat ARG times."
             (setq we-have-wrapped t)
             (goto-char crossword--first-square)))
          (when (and crossword-tab-to-next-unfilled
-                    (/= crossword--completed-count crossword--total-count))
+                    (/= crossword--solved-count crossword--total-count))
            (while (not done)
              (backward-char)
              (if (crossword--fwd-avail (nth 3 next))
@@ -2119,7 +2119,7 @@ Optionally, repeat ARG times."
            (when crossword-wrap-on-entry-or-nav
              (goto-char (car (nth 2 (car crossword--down-clue-list))))))
           (when (and crossword-tab-to-next-unfilled
-                     (/= crossword--completed-count crossword--total-count))
+                     (/= crossword--solved-count crossword--total-count))
             (while (not done)
               (if (crossword--is-empty-square)
                 (setq done t)
@@ -2177,7 +2177,7 @@ Optionally, repeat ARG times."
                          (setq index (1- (length crossword--across-clue-list)))
                          (car (last crossword--across-clue-list)))))))))
         (when (and crossword-tab-to-next-unfilled
-                   (/= crossword--completed-count crossword--total-count))
+                   (/= crossword--solved-count crossword--total-count))
           ;; This is a bit weird because we are moving to the FIRST
           ;; character of the PRIOR field, then, advancing forward
           ;; toward the end of that field, then moving to the PRIOR
@@ -2220,7 +2220,7 @@ Optionally, repeat ARG times."
                                      (setq index (1- (length crossword--down-clue-list)))
                                      (car (last crossword--down-clue-list)))))))
            (when (and crossword-tab-to-next-unfilled
-                      (/= crossword--completed-count crossword--total-count))
+                      (/= crossword--solved-count crossword--total-count))
              ;; This is a bit weird because we are moving to the FIRST
              ;; character of the PRIOR field, then, advancing forward
              ;; toward the end of that field, then moving to the PRIOR
@@ -2688,7 +2688,8 @@ state. Internally, each entry is a list of ten strings:
    7: %solved
    8: num checked
    9: num errors
-  10: timer elapsed time."
+  10: num cheats
+  11: timer elapsed time."
   (let ((orig-buf (current-buffer))
         result)
     (dolist (file (crossword--puzzle-file-list))
