@@ -1,5 +1,10 @@
 2021-02-09  Boruch Baum  <boruch_baum@gmx.com>
 
+	* crossword.el (crossword--version): New variable.
+	(crossword--local-vars-list): Use it.
+
+2021-02-09  Boruch Baum  <boruch_baum@gmx.com>
+
 	* crossword.el (crossword-quit): Set point in tabulated list to recent
 	puzzle entry.
 

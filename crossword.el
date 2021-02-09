@@ -508,6 +508,9 @@ character.")
 ;;
 ;;; Buffer-local variables (only for crossword-grid buffer)
 
+(defvar-local crossword--version       nil
+  "Version used to create puz-emacs file.
+For format and data structure compatability purposes.")
 
 (defvar-local crossword--filename      nil)
 (defvar-local crossword--date          nil)
@@ -1084,7 +1087,8 @@ If POS is NIL, acts on POINT. In this context, 'empty' means not
   ;;   variables.
   (let (result)
     (dolist
-      (var '(crossword--filename
+      (var '(crossword--version
+             crossword--filename
              crossword--date
              crossword--first-square
              crossword--last-square
@@ -1534,7 +1538,8 @@ GRID-WINDOW is the dedicated crossword-grid window."
    ;; ** Finish in grid buffer
    (select-window grid-window 'norecord)
    (crossword--incf-completion-count 0)
-   (setq crossword--across-clue-list across-clue-list
+   (setq crossword--version          "1.0"
+         crossword--across-clue-list across-clue-list
          crossword--down-clue-list   down-clue-list
          crossword--last-square      (1- (nth 3 (car (last crossword--across-clue-list))))
          crossword--first-square     (nth 2 (nth 0 crossword--across-clue-list))
