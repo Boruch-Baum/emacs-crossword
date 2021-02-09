@@ -2787,11 +2787,9 @@ Prompt to save current state, then kill buffers, windows, and frame."
   (message "")
   (advice-remove #'self-insert-command #'crossword--advice-around-self-insert-command)
   (advice-remove #'call-interactively  #'crossword--advice-around-call-interactively)
-  (let* ((file (concat "\\<"
-                       (file-name-sans-extension
-                         (file-name-nondirectory
-                           (or crossword--filename "")))
-                       "\\>"))
+  (let* ((file (file-name-sans-extension
+                 (file-name-nondirectory
+                   (or crossword--filename ""))))
          (the-list-buffer "Crossword list")
          (crossword-quit-to-browser
            (unless (equal the-list-buffer (buffer-name))
@@ -2811,10 +2809,19 @@ Prompt to save current state, then kill buffers, windows, and frame."
     (cond
      (crossword-quit-to-browser
        (crossword-summary)
-       (when (re-search-forward file nil t)
-         (unless (re-search-forward "\\<puz-emacs\\>" (line-end-position) t)
-           (re-search-forward file nil t))
-         (goto-char (line-beginning-position))))
+       (let (entry puz-pos (next t))
+         ;; (goto-char (point-min)) ; unnecessary
+         (while next
+           (setq entry (get-text-property (point) 'tabulated-list-entry))
+           (when (string= file (elt entry 0))
+             (when (string= "puz-emacs" (elt entry 1))
+               (setq next nil))
+             (setq puz-pos (point)))
+           (goto-char
+             (or (setq next
+                   (next-single-property-change (point) 'tabulated-list-entry))
+                 puz-pos
+                 (point-min))))))
      (t ; ie. (not crossword-quit-to-browser)
        (condition-case nil
          (progn
