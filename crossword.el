@@ -2787,9 +2787,11 @@ Prompt to save current state, then kill buffers, windows, and frame."
   (message "")
   (advice-remove #'self-insert-command #'crossword--advice-around-self-insert-command)
   (advice-remove #'call-interactively  #'crossword--advice-around-call-interactively)
-  (let* ((file (file-name-sans-extension
-                 (file-name-nondirectory
-                   (or crossword--filename ""))))
+  (let* ((file (concat "\\<"
+                       (file-name-sans-extension
+                         (file-name-nondirectory
+                           (or crossword--filename "")))
+                       "\\>"))
          (the-list-buffer "Crossword list")
          (crossword-quit-to-browser
            (unless (equal the-list-buffer (buffer-name))
@@ -2809,9 +2811,9 @@ Prompt to save current state, then kill buffers, windows, and frame."
     (cond
      (crossword-quit-to-browser
        (crossword-summary)
-       (when (search-forward file nil t)
-         (unless (search-forward "puz-emacs" (line-end-position) t)
-           (search-forward file nil t))
+       (when (re-search-forward file nil t)
+         (unless (re-search-forward "\\<puz-emacs\\>" (line-end-position) t)
+           (re-search-forward file nil t))
          (goto-char (line-beginning-position))))
      (t ; ie. (not crossword-quit-to-browser)
        (condition-case nil
