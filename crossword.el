@@ -513,6 +513,7 @@ character.")
 For format and data structure compatability purposes.")
 
 (defvar-local crossword--filename      nil)
+(defvar-local crossword--hash          nil)
 (defvar-local crossword--date          nil)
 (defvar-local crossword--across-buffer nil)
 (defvar-local crossword--down-buffer   nil)
@@ -1621,6 +1622,9 @@ puzzle's clues."
    (if (string-match "\\.puz-emacs$" puz-file)
      (crossword-restore puz-file)
     (crossword--start-game-puz puz-file grid-window))
+   (setq crossword--hash
+     (secure-hash 'md5 (buffer-substring-no-properties
+                         (point-min) crossword--grid-end)))
    (setq buffer-read-only t)
    (setq inhibit-read-only nil)))
 
@@ -2783,6 +2787,9 @@ Prompt to save current state, then kill buffers, windows, and frame."
                (error nil))
              (pop-to-buffer "Crossword grid")
              crossword--filename
+             (not (string= crossword--hash
+                           (secure-hash 'md5 (buffer-substring-no-properties
+                                               (point-min) crossword--grid-end))))
              (yes-or-no-p "Save current puzzle state before quitting? "))
     (crossword-backup)
     (let ((data (crossword--summary-add-current)))

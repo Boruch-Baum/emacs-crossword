@@ -1,3 +1,9 @@
+2021-02-10  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.el (crossword--hash, crossword--start-game): Record
+	game state at start.
+	(crossword-quit): Only prompt to save game if state changed.
+
 2021-02-09  Boruch Baum  <boruch_baum@gmx.com>
 
 	* crossword.el (crossword--version): New variable.
