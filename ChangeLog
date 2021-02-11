@@ -1,3 +1,10 @@
+2021-02-11  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.el (crossword-check-letter): decrement
+	'completed-count' on error discovery.
+	(crossword--insert-char): Auto-check completed puzzle after
+	possibly correcting error.
+
 2021-02-10  Boruch Baum  <boruch_baum@gmx.com>
 
 	* crossword.el (crossword--hash, crossword--start-game): Record
