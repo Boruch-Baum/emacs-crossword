@@ -1,5 +1,9 @@
 2021-02-11  Boruch Baum  <boruch_baum@gmx.com>
 
+	* crossword.el (crossword--date-matcher): Improve copyright regex
+
+2021-02-11  Boruch Baum  <boruch_baum@gmx.com>
+
 	* crossword.el (crossword-check-letter): decrement
 	'completed-count' on error discovery.
 	(crossword--insert-char): Auto-check completed puzzle after

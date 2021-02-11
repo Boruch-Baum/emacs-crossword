@@ -1662,7 +1662,7 @@ The return value is the `match-end' of the regex."
           (when (string-match month str)
             (setq found (match-end 0))))
         found)
-      (string-match " [[:digit:]]\\{2\\}, [[:digit:]]\\{4\\}, " str found)
+      (string-match " [[:digit:]]?[[:digit:]], [[:digit:]]\\{4\\}, " str found)
       (match-end 0))))
 
 
