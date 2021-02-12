@@ -1442,15 +1442,40 @@ header line."
                                  '(width  . 140))))))))
 
 
+(defun crossword--construct-clue-buffers ()
+  "Inserts clues into clue buffers and updates data structures."
+  (let ((grid-window      (selected-window))
+        (across-clue-list crossword--across-clue-list)
+        (down-clue-list   crossword--down-clue-list)
+        (across-buffer    crossword--across-buffer)
+        (down-buffer      crossword--down-buffer))
+  ;; ** Fill across buffer
+  (setq across-clue-list
+    (crossword--insert-clues across-buffer
+                             'clue-across
+                             across-clue-list
+                             "--- Across clues for crossword"))
+  ;; ** Fill down buffer
+  (setq down-clue-list
+    (crossword--insert-clues down-buffer
+                             'clue-down
+                             down-clue-list
+                             "--- Down clues for crossword"))
+  (select-window grid-window 'norecord)
+  (setq crossword--across-clue-list across-clue-list
+        crossword--down-clue-list   down-clue-list)))
+
+
 (defun crossword--recover-game-in-progress ()
   "Restore frame, windows, and buffers of a game in progress.
 If no game is in progress, returns to caller, otherwise signals a
 `user-error'."
-  (let ((grid-buffer (get-buffer "Crossword grid"))
+  (let ((inhibit-read-only t)
+        (grid-buffer (get-buffer "Crossword grid"))
+        across-buffer down-buffer
         grid-window across-window down-window)
     (when grid-buffer
       (message "Game in progress. Restoring...")
-;;    ;; compare with `crossword--start-game' and consider consolidating code
       (condition-case nil
         (progn
           (select-frame-by-name "Crossword")
@@ -1458,41 +1483,39 @@ If no game is in progress, returns to caller, otherwise signals a
         (error nil))
       (crossword--select-frame)
       (delete-other-windows)
+      (switch-to-buffer grid-buffer)
       (setq grid-window   (selected-window)
-            across-window (split-window-right)
-            down-window   (split-window-right))
+            across-buffer (setq crossword--across-buffer
+                            (get-buffer-create  "Crossword across"))
+            down-buffer   (setq crossword--down-buffer
+                            (get-buffer-create  "Crossword down"))
+            down-window   (split-window-right)
+            across-window (split-window-right))
       (set-window-dedicated-p nil nil)
       (switch-to-buffer grid-buffer 'norecord 'force)
       (set-window-dedicated-p nil t)
-      (select-window across-window)
+      (select-window across-window 'norecord)
       (set-window-dedicated-p nil nil)
       (buffer-disable-undo
-        (switch-to-buffer
-          (setq crossword--across-buffer
-            (get-buffer-create  "Crossword across"))
-          'norecord 'force))
+        (switch-to-buffer across-buffer 'norecord 'force))
       (set-window-dedicated-p nil t)
-      (select-window down-window)
+      (select-window down-window 'norecord)
       (set-window-dedicated-p nil nil)
       (buffer-disable-undo
-        (switch-to-buffer
-          (setq crossword--down-buffer
-            (get-buffer-create  "Crossword down"))
-          'norecord 'force))
+        (switch-to-buffer down-buffer 'norecord 'force))
       (set-window-dedicated-p nil t)
+      (select-window grid-window 'norecord)
+      (crossword--construct-clue-buffers)
       (user-error "Game in progress. Restoring... complete"))))
-;; BUG creates scratch buffer window
 
 
 (defun crossword--start-game-puz (puz-file grid-window)
   "Parse PUZ-FILE for '.puz' format file and begins play.
 GRID-WINDOW is the dedicated crossword-grid window."
   (let ((coding-system-for-read crossword-puzzle-file-coding)
-        (across-buffer crossword--across-buffer)
-        (down-buffer   crossword--down-buffer)
         grid-width grid-height grid-size
         colophon clean-grid answer-grid
-        clue-list across-clue-list down-clue-list)
+        clue-list)
    (select-window grid-window 'norecord) ;; FIXME: should be unnecessary, remove
    (insert-file-contents (setq crossword--filename puz-file))
    ;; ** Sanity checks for 'puz' file format
@@ -1523,26 +1546,9 @@ GRID-WINDOW is the dedicated crossword-grid window."
      (split-string (buffer-substring 1 (point-max)) "\n"))
    (erase-buffer)
    (crossword--insert-grid grid-width colophon clean-grid answer-grid clue-list)
-   (setq across-clue-list crossword--across-clue-list
-         down-clue-list   crossword--down-clue-list)
-   ;; ** Fill across buffer
-   (setq across-clue-list
-     (crossword--insert-clues across-buffer
-                              'clue-across
-                              across-clue-list
-                              "--- Across clues for crossword"))
-   ;; ** Fill down buffer
-   (setq down-clue-list
-     (crossword--insert-clues down-buffer
-                              'clue-down
-                              down-clue-list
-                              "--- Down clues for crossword"))
-   ;; ** Finish in grid buffer
-   (select-window grid-window 'norecord)
+   (crossword--construct-clue-buffers)
    (crossword--incf-completion-count 0)
    (setq crossword--version          "1.0"
-         crossword--across-clue-list across-clue-list
-         crossword--down-clue-list   down-clue-list
          crossword--last-square      (1- (nth 3 (car (last crossword--across-clue-list))))
          crossword--first-square     (nth 2 (nth 0 crossword--across-clue-list))
          crossword--first-column     3

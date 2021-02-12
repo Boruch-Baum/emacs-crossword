@@ -1,6 +1,16 @@
 2021-02-12  Boruch Baum  <boruch_baum@gmx.com>
 
-	(crossword-summary-delete): Delete all files in selected region.
+	* crossword.el (crossword--construct-clue-buffers): New function,
+	to consolidate code.
+	(crossword--recover-game-in-progress, crossword--start-game-puz):
+	use it.
+	(crossword--recover-game-in-progress): handle recovery cases of
+	killed clue buffers.
+
+2021-02-12  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.el (crossword-summary-delete): Delete all files in
+	selected region.
 	(crossword-summary-select): Gracefully handle errror of file not
 	selected.
 
