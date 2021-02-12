@@ -2534,7 +2534,7 @@ will be displayed at the bottom of the crossword grid window."
        (add-face-text-property beg end 'crossword-error-face)
        (put-text-property beg end 'errors
          (sort (nconc (list letter) errors-list) 'string<))
-       (crossword--incf-completed-count -1)
+       (crossword--incf-completion-count -1)
        (crossword--incf-error-count))))
    ;; Maybe this next should be withinthe 'when' level?
    (crossword--update-grid-clues (get-text-property beg 'clue-across)
