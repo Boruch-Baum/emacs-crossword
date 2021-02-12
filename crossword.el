@@ -1036,7 +1036,8 @@ sets variable `last-input-event' to nil after using its value."
       ;; ** Update puzzle completion sattistics
       (cond
        ((string-match "[[:upper:]]" char-to-insert)
-        (unless (string-match "[[:upper:]]" char-current)
+        (when (or (not (string-match "[[:upper:]]" char-current))
+                  (member char-current (get-text-property (point) 'errors)))
           (crossword--incf-completion-count 1))
         (when (and crossword-auto-check-completed
                    (= crossword--completed-count crossword--total-count))
