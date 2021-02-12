@@ -1036,15 +1036,13 @@ sets variable `last-input-event' to nil after using its value."
       ;; ** Update puzzle completion sattistics
       (cond
        ((string-match "[[:upper:]]" char-to-insert)
-        (when (or (not (string-match "[[:upper:]]" char-current))
-                  (member char-current (get-text-property (point) 'errors)))
+        (when (and (not (member char-to-insert (get-text-property (point) 'errors)))
+                   (or (not (string-match "[[:upper:]]" char-current))
+                       (member char-current (get-text-property (point) 'errors))))
           (crossword--incf-completion-count 1))
         (when (and crossword-auto-check-completed
-                   (= crossword--completed-count crossword--total-count))
-          (let ((pos (point)))
-            (backward-char)
-            (crossword-check-puzzle)
-            (goto-char pos))))
+                   (>= crossword--completed-count crossword--total-count))
+            (crossword-check-puzzle)))
        (t ; ie. (not (string-match "[[:upper:]]" char-to-insert))
         (when (string-match "[[:upper:]]" char-current)
           (crossword--incf-completion-count -1))))

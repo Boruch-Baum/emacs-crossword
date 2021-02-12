@@ -1,5 +1,11 @@
 2021-02-12  Boruch Baum  <boruch_baum@gmx.com>
 
+	(crossword--insert-char): BUGFIXES: Set point properly whe
+	performing auto-check on complete, don't increment completion count
+	when repeating a known error.
+
+2021-02-12  Boruch Baum  <boruch_baum@gmx.com>
+
 	* crossword.el (crossword--construct-clue-buffers): New function,
 	to consolidate code.
 	(crossword--recover-game-in-progress, crossword--start-game-puz):
