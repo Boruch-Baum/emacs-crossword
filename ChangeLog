@@ -1,8 +1,13 @@
 2021-02-12  Boruch Baum  <boruch_baum@gmx.com>
 
-	(crossword--insert-char): BUGFIXES: Set point properly whe
-	performing auto-check on complete, don't increment completion count
-	when repeating a known error.
+	* crossword.el (crossword-previous-line, crossword-next-line):
+	Bugfix to correctly handle first/last line at the current column.
+
+2021-02-12  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.el (crossword--insert-char): BUGFIXES: Set point
+	properly whe performing auto-check on complete, don't increment
+	completion count when repeating a known error.
 
 2021-02-12  Boruch Baum  <boruch_baum@gmx.com>
 
