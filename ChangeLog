@@ -1,3 +1,9 @@
+2021-02-12  Boruch Baum  <boruch_baum@gmx.com>
+
+	(crossword-summary-delete): Delete all files in selected region.
+	(crossword-summary-select): Gracefully handle errror of file not
+	selected.
+
 2021-02-11  Boruch Baum  <boruch_baum@gmx.com>
 
 	* crossword.el (crossword--date-matcher): Improve copyright regex

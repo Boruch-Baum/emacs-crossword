@@ -2742,15 +2742,35 @@ Default is to advance one column."
 
 
 (defun crossword-summary-delete()
-  "Delete the puzzle file at POINT in a `crossword-summary' buffer."
+  "Delete the puzzle file at POINT in a `crossword-summary' buffer.
+If REGION is active, delete all puzzle files within it."
   (interactive)
   (unless (eq major-mode 'crossword-summary-mode)
     (user-error "Not in Crossword summary mode"))
-  (let* ((puz-file (aref (tabulated-list-get-entry) 0))
-         (msg (format "Do you really want to delete file %s? " puz-file)))
+  (let (puz-files msg pos end entry num (plural ""))
+    (if (not (region-active-p))
+      (setq puz-files
+        (list (when (setq entry (tabulated-list-get-entry))
+                (concat (aref entry 0) "." (aref entry 1)))))
+     (setq pos (point)
+           end (region-end))
+     (goto-char (region-beginning))
+     (while (and (<= (point) end)
+                 (setq entry (tabulated-list-get-entry)))
+       (push (concat (aref entry 0) "." (aref entry 1))
+             puz-files)
+       (forward-line 1))
+     (goto-char pos))
+    (unless (car puz-files)
+      (user-error "Nothing selected to delete"))
+    (when (< 1 (setq num (length puz-files)))
+      (setq plural "s"))
+    (setq num (if (or (not num) (= 1 num)) "" (format " %d" num)))
+    (setq msg (format "Do you really want to delete the%s file%s %s? "
+                      num plural puz-files))
     (when (yes-or-no-p msg)
-      (delete-file (concat crossword-save-path puz-file "."
-                           (aref (tabulated-list-get-entry) 1)))
+      (while (setq entry (pop puz-files))
+        (delete-file (concat crossword-save-path entry)))
       (crossword--summary-revert-hook-function))))
 
 
@@ -2759,9 +2779,11 @@ Default is to advance one column."
   (interactive)
   (unless (eq major-mode 'crossword-summary-mode)
     (user-error "Not in Crossword summary mode"))
-  (let ((puz-file (concat crossword-save-path
-                          (aref (tabulated-list-get-entry) 0) "."
-                          (aref (tabulated-list-get-entry) 1))))
+  (let* ((entry (tabulated-list-get-entry))
+         (puz-file (if (not entry)
+                     (user-error "No puzzle selected")
+                    (concat crossword-save-path
+                            (aref entry 0) "." (aref entry 1)))))
     (unless (file-readable-p puz-file)
       (error "File unreadable: %s" puz-file))
     (kill-buffer)
