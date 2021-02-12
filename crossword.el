@@ -2799,10 +2799,7 @@ If REGION is active, delete all puzzle files within it."
 (defun crossword-recover-game-in-progress ()
   "Attempt to recover an 'deleted' game.
 In this context, 'deleted' means that either the frame or its
-clue buffer(s) was/were deleted.
-
-At present, if a clue buffer is deleted, the recovery procedure
-is to save, quit, and restart the game. "
+clue buffer(s) was/were deleted."
   (interactive)
   (crossword--recover-game-in-progress))
 
