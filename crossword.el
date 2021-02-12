@@ -2080,85 +2080,91 @@ Optionally, repeat ARG times."
    (while (< (cl-incf repeat) arg)
     (cond
      ((eq crossword--nav-dir 'across)
-       (let* ((start (point)) we-have-wrapped done
-              prev next
-              (this (or (get-text-property (point) 'clue-across)
-                        (get-text-property
-                          (setq prev (or (previous-single-property-change (point) 'clue-across)
-                                         2))
-                          'clue-across)
-                        (get-text-property (1- prev) 'clue-across))))
-         (if (and this
-                  (setq next
-                        (cadr (memq (assq this crossword--across-clue-list)
-                                    crossword--across-clue-list))))
-           (goto-char (nth 2 next))
-          (when crossword-wrap-on-entry-or-nav
-            (setq we-have-wrapped t)
-            (goto-char crossword--first-square)))
-         (when (and crossword-tab-to-next-unfilled
-                    (/= crossword--solved-count crossword--total-count))
-           (while (not done)
-             (backward-char)
-             (if (crossword--fwd-avail (nth 3 next))
-               (setq done t)
-              (backward-char)
-              (setq next (cadr (memq (assq (get-text-property (point) 'clue-across)
-                                           crossword--across-clue-list)
+       (if (or (< (point) crossword--first-square)
+               (> (point) crossword--last-square))
+          (goto-char crossword--first-square)
+        (let* ((start (point)) we-have-wrapped done
+               prev next this)
+          (setq this
+            (or (get-text-property (point) 'clue-across)
+                (get-text-property
+                  (setq prev (or (previous-single-property-change (point) 'clue-across)
+                                 crossword--first-square)) ; should never happen
+                  'clue-across)))
+          (if (setq next(cadr (memq (assq this crossword--across-clue-list)
                                      crossword--across-clue-list)))
-              (cond
-               (next
-                 (if (or (not crossword-wrap-on-entry-or-nav)
-                         (not we-have-wrapped)
-                         (< (nth 2 next) start))
-                   (goto-char (nth 2 next))
-                  (setq done t)
-                  (goto-char start)))
-               ((not crossword-wrap-on-entry-or-nav)
-                 (setq done t)
-                 (goto-char start))
-               (t; ie. crossword-wrap-on-entry-or-nav and at end
-                 (setq we-have-wrapped t)
-                 (goto-char crossword--first-square))))))))
-     ((eq crossword--nav-dir 'down)
-       (if (not (get-text-property (point) 'clue-down))
-         (let ((crossword--nav-dir 'across))
-           (while (and (crossword-next-char 1)
-                       (not (crossword--pos-above-is-void (point))))))
-        (let ((next (cadr (memq (assq (get-text-property (point) 'clue-down)
-                                      crossword--down-clue-list)
-                                crossword--down-clue-list)))
-              (start (point))
-              done we-have-wrapped)
-          (if next
-            (goto-char (car (nth 2 next)))
+            (goto-char (nth 2 next))
            (when crossword-wrap-on-entry-or-nav
-             (goto-char (car (nth 2 (car crossword--down-clue-list))))))
+             (setq we-have-wrapped t)
+             (goto-char crossword--first-square)))
           (when (and crossword-tab-to-next-unfilled
                      (/= crossword--solved-count crossword--total-count))
             (while (not done)
-              (if (crossword--is-empty-square)
+              (backward-char)
+              (if (crossword--fwd-avail (nth 3 next))
                 (setq done t)
-               (crossword--next-square-in-clue)
-               (if (crossword--is-empty-square)
-                 (setq done t)
-                (setq next (cadr (memq (assq (get-text-property (point) 'clue-down)
-                                             crossword--down-clue-list)
-                                       crossword--down-clue-list)))
-                (cond
-                 (next
-                   (if (or (not crossword-wrap-on-entry-or-nav)
-                           (not we-have-wrapped)
-                           (< (car (nth 2 next)) start))
-                     (goto-char (car (nth 2 next)))
-                    (setq done t)
-                    (goto-char start)))
-                 ((not crossword-wrap-on-entry-or-nav)
+               (backward-char)
+               (setq next (cadr (memq (assq (get-text-property (point) 'clue-across)
+                                            crossword--across-clue-list)
+                                      crossword--across-clue-list)))
+               (cond
+                (next
+                  (if (or (not crossword-wrap-on-entry-or-nav)
+                          (not we-have-wrapped)
+                          (< (nth 2 next) start))
+                    (goto-char (nth 2 next))
                    (setq done t)
-                   (goto-char start))
-                 (t; ie. crossword-wrap-on-entry-or-nav and at end
-                   (setq we-have-wrapped t)
-                   (goto-char crossword--first-square))))))))))))))
+                   (goto-char start)))
+                ((not crossword-wrap-on-entry-or-nav)
+                  (setq done t)
+                  (goto-char start))
+                (t; ie. crossword-wrap-on-entry-or-nav and at end
+                  (setq we-have-wrapped t)
+                  (goto-char crossword--first-square)))))))))
+     ((eq crossword--nav-dir 'down)
+       (cond
+        ((or (< (point) crossword--first-square)
+             (> (point) crossword--last-square))
+          (goto-char crossword--first-square))
+        ((not (get-text-property (point) 'clue-down))
+          (let ((crossword--nav-dir 'across))
+            (while (and (crossword-next-char 1)
+                        (not (crossword--pos-above-is-void (point)))))))
+        (t ; ie. within grid, on a clue down square
+          (let ((next (cadr (memq (assq (get-text-property (point) 'clue-down)
+                                        crossword--down-clue-list)
+                                  crossword--down-clue-list)))
+                (start (point))
+                done we-have-wrapped)
+            (if next
+              (goto-char (car (nth 2 next)))
+             (when crossword-wrap-on-entry-or-nav
+               (goto-char (car (nth 2 (car crossword--down-clue-list))))))
+            (when (and crossword-tab-to-next-unfilled
+                       (/= crossword--solved-count crossword--total-count))
+              (while (not done)
+                (if (crossword--is-empty-square)
+                  (setq done t)
+                 (crossword--next-square-in-clue)
+                 (if (crossword--is-empty-square)
+                   (setq done t)
+                  (setq next (cadr (memq (assq (get-text-property (point) 'clue-down)
+                                               crossword--down-clue-list)
+                                         crossword--down-clue-list)))
+                  (cond
+                   (next
+                     (if (or (not crossword-wrap-on-entry-or-nav)
+                             (not we-have-wrapped)
+                             (< (car (nth 2 next)) start))
+                       (goto-char (car (nth 2 next)))
+                      (setq done t)
+                      (goto-char start)))
+                   ((not crossword-wrap-on-entry-or-nav)
+                     (setq done t)
+                     (goto-char start))
+                   (t; ie. crossword-wrap-on-entry-or-nav and at end
+                     (setq we-have-wrapped t)
+                     (goto-char crossword--first-square)))))))))))))))
 
 
 (defun crossword-prior-field (&optional arg)

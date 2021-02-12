@@ -2,6 +2,8 @@
 
 	* crossword.el (crossword-previous-line, crossword-next-line):
 	Bugfix to correctly handle first/last line at the current column.
+	(crossword-next-field): Bugfix to handle cases of user forcing
+	point out of grid.
 
 2021-02-12  Boruch Baum  <boruch_baum@gmx.com>
 
