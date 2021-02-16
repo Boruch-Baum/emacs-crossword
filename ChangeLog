@@ -1,3 +1,8 @@
+2021-02-16  Boruch Baum  <boruch_baum@gmx.com>
+
+	* crossword.el (crossword--insert-char): Bugfix: Fix math for
+	completion count.
+
 2021-02-12  Boruch Baum  <boruch_baum@gmx.com>
 
 	* crossword.el (crossword-previous-line, crossword-next-line):
