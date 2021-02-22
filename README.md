@@ -1,4 +1,5 @@
-# crossword.el [![MELPA](https://melpa.org/packages/crossword-badge.svg)](https://melpa.org/#/crossword)
+# crossword.el
+     [![MELPA](https://melpa.org/packages/crossword-badge.svg)](https://melpa.org/#/crossword) [![MELPA Stable](https://stable.melpa.org/packages/crossword-badge.svg)](https://stable.melpa.org/#/crossword)
 
    * Download and play crossword puzzles in Emacs.
 
@@ -174,7 +175,7 @@
                    M-t           crossword-pause-unpause-timer
 
    That about does it, doesn't it? Here are some of the 'intuitive'
-   navigation keybindings given special attentionL
+   navigation keybindings given special attention:
 
                   <left>         crossword-prior-char
                   <right>        crossword-next-char
@@ -275,10 +276,6 @@
     * Scrub history
     * More ...
   * https://github.com/Boruch-Baum/emacs-w3m
-
-* Crossword [![MELPA](https://melpa.org/packages/crossword-badge.svg)](https://melpa.org/#/crossword)
-  * Download and play crossword puzzles, in Emacs!
-  * https://github.com/Boruch-Baum/emacs-crossword
 
 * Key-assist
   [![MELPA](https://melpa.org/packages/key-assist-badge.svg)](https://melpa.org/#/key-assist)
