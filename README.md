@@ -1,5 +1,4 @@
-# crossword.el
-     [![MELPA](https://melpa.org/packages/crossword-badge.svg)](https://melpa.org/#/crossword) [![MELPA Stable](https://stable.melpa.org/packages/crossword-badge.svg)](https://stable.melpa.org/#/crossword)
+# crossword.el [![MELPA](https://melpa.org/packages/crossword-badge.svg)](https://melpa.org/#/crossword) [![MELPA Stable](https://stable.melpa.org/packages/crossword-badge.svg)](https://stable.melpa.org/#/crossword)
 
    * Download and play crossword puzzles in Emacs.
 
