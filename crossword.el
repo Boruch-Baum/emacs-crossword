@@ -2873,7 +2873,8 @@ Prompt to save current state, then kill buffers, windows, and frame."
          (progn
            (select-frame-by-name "Crossword")
            (delete-frame nil))
-         (error nil))))))
+         (error nil))
+       (select-frame (previous-frame))))))
 
 
 
